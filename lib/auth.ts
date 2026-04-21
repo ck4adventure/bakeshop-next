@@ -10,9 +10,9 @@ type HardcodedUser = {
 }
 
 const USERS: HardcodedUser[] = [
-  { id: "1", name: "Admin",   username: "admin",   password: "admin123",   role: "admin" },
-  { id: "2", name: "Manager", username: "manager", password: "manager123", role: "manager" },
-  { id: "3", name: "Baker",   username: "baker",   password: "baker123",   role: "baker" },
+  { id: "1", name: "Admin",   username: "admin",   password: process.env.ADMIN_PASSWORD   ?? "", role: "admin" },
+  { id: "2", name: "Manager", username: "manager", password: process.env.MANAGER_PASSWORD ?? "", role: "manager" },
+  { id: "3", name: "Baker",   username: "baker",   password: process.env.BAKER_PASSWORD   ?? "", role: "baker" },
 ]
 
 async function validateUser(username: string, password: string) {
