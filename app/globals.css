@@ -2,8 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* ─── Dark mode via .dark class on <html> ─────────────────────────────────── */
-@custom-variant dark (&:is(.dark *));
+/* ─── Dark mode via data-mode="dark" on <html> (next-themes) ─────────────── */
+@custom-variant dark {
+  &:where([data-mode="dark"], [data-mode="dark"] *) {
+    @slot;
+  }
+}
 
 /* ─── Landscape orientation variant ──────────────────────────────────────── */
 @custom-variant landscape (@media (orientation: landscape));
@@ -68,7 +72,7 @@
   --sidebar-ring:             oklch(0.708 0 0);
 }
 
-.dark {
+[data-mode="dark"] {
   /* Backgrounds */
   --color-bg:             #1C1917;
   --color-surface:        #292524;

@@ -13,7 +13,7 @@ export default async function Home() {
 			{/* Header Bar */}
 			<header className="w-full bg-white shadow flex items-center justify-between px-8 py-4">
 				<div className="flex items-center gap-2">
-					<Image src="/cookies.png" alt="Logo" width={32} height={32} />
+					<Image src="/cookies_clear.png" alt="Logo" width={32} height={32} />
 					<span className="text-xl font-bold text-blue-900">Bakedown</span>
 				</div>
 				<nav className="flex items-center gap-6">

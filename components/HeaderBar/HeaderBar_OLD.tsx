@@ -3,20 +3,19 @@
 // Headerbar for all '/:business/' pages
 
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 
 const HeaderBar = () => {
-	const router = useRouter();
-
 	return (
 		<header
 			data-testid="headerbar"
 			className="w-full h-16 bg-purple-200 flex justify-between items-center p-4 border-b-2 border-slate-300"
 		>
-			<div className="flex items-center gap-2 flex-1 cursor-pointer" onClick={() => router.push("/")}>
-				<img src="/coookies.png" alt="Bakedown logo" className="h-8 w-8" />
+			<Link href="/" className="flex items-center gap-2 flex-1">
+				<Image src="/cookies.png" alt="Bakedown logo" width={32} height={32} />
 				<span className="text-xl font-bold text-blue-900">Bakedown</span>
-			</div>
+			</Link>
 
 			<div className="flex-1 flex justify-end">
 				<button
