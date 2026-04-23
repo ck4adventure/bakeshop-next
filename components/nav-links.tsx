@@ -19,6 +19,7 @@ export default function NavLinks({ tabs }: { tabs: Tab[] }) {
 				<Link
 					key={tab.label}
 					href={tab.href}
+					aria-current={pathname === tab.href ? 'page' : undefined}
 					className={clsx(
 						'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
 						{
