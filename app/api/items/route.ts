@@ -1,0 +1,47 @@
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { slugify } from '@/lib/utils'
+
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.bakeryId) {
+    return Response.json({ message: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { name, par, defaultBatchQty, categoryId, initialQty } = await req.json()
+  if (!name?.trim()) {
+    return Response.json({ message: 'Name is required' }, { status: 400 })
+  }
+
+  const baseSlug = slugify(name.trim())
+  // Ensure slug uniqueness by appending a suffix if needed
+  let slug = baseSlug
+  let suffix = 1
+  while (await prisma.item.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${suffix++}`
+  }
+
+  const item = await prisma.item.create({
+    data: {
+      name: name.trim(),
+      slug,
+      par: par ?? null,
+      defaultBatchQty: defaultBatchQty ?? null,
+      categoryId: categoryId ?? null,
+      bakeryId: session.user.bakeryId,
+    },
+    include: { category: { select: { id: true, name: true } } },
+  })
+
+  if (initialQty != null && initialQty > 0) {
+    await prisma.$transaction([
+      prisma.itemInventory.create({ data: { itemId: item.id, quantity: initialQty } }),
+      prisma.inventoryTransaction.create({
+        data: { itemId: item.id, quantity: initialQty, reason: 'ADJUSTMENT' },
+      }),
+    ])
+  }
+
+  return Response.json(item, { status: 201 })
+}
