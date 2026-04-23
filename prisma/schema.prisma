@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+	url      = env("DATABASE_URL")
+}
+//  
+
+// --------   Bakery   ----------
+model Bakery {
+  id            String               @id @default(uuid())
+  name          String
+  slug          String               @unique
+  operatingDays Weekday[]            // empty = not yet configured (treat as all days open)
+  users         User[]
+  items         Item[]
+  categories    Category[]
+  overrides     DailyQuotaOverride[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+// --------   Users   ----------
+enum Role {
+  ADMIN
+  MANAGER
+  BAKER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(BAKER)
+  bakery       Bakery?  @relation(fields: [bakeryId], references: [id])
+  bakeryId     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --------   Categories   ----------
+model Category {
+  id       Int    @id @default(autoincrement())
+  name     String
+  bakery   Bakery @relation(fields: [bakeryId], references: [id])
+  bakeryId String
+  items    Item[]
+
+  @@unique([name, bakeryId])
+}
+
+// --------   Items   ----------
+model Item {
+  id              Int                    @id @default(autoincrement())
+  name            String
+  slug            String                 @unique
+  par             Int?
+  defaultBatchQty Int?
+  bakery          Bakery?                @relation(fields: [bakeryId], references: [id])
+  overrides       DailyQuotaOverride[]
+  bakeryId        String?
+  category        Category?              @relation(fields: [categoryId], references: [id])
+  categoryId      Int?
+  inventory       ItemInventory?
+  schedules       ProductionSchedule[]
+  transactions    InventoryTransaction[]
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+}
+
+model InventoryTransaction {
+  id        Int             @id @default(autoincrement())
+  product   Item            @relation(fields: [itemId], references: [id])
+  itemId    Int
+  quantity  Int // positive = added to freezer, negative = removed (bake/adjustment)
+  reason    InventoryReason
+  note      String?         // optional explanation (e.g. qty differs from quota)
+  createdAt DateTime        @default(now())
+}
+
+model ItemInventory {
+  itemId    Int      @id
+  quantity  Int      @default(0)
+  item      Item     @relation(fields: [itemId], references: [id])
+  updatedAt DateTime @updatedAt
+}
+
+enum InventoryReason {
+  BATCH // to add
+  BAKE // daily bake off
+  ADJUSTMENT // something fell on floor or burnt
+  // Add more as needed
+}
+
+enum Weekday {
+  Sunday
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+}
+
+// One-off quota override for a specific calendar date (overrides the weekly template)
+model DailyQuotaOverride {
+  id        Int      @id @default(autoincrement())
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId    Int
+  bakery    Bakery   @relation(fields: [bakeryId], references: [id])
+  bakeryId  String
+  date            DateTime @db.Date
+  quantity        Int
+  specialOrderQty Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([itemId, date])
+}
+
+model ProductionSchedule {
+  itemId Int  
+	weekday Weekday
+	quantity Int @default(0)
+  item   Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+	@@id([itemId, weekday])
+}
