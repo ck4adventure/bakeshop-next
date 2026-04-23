@@ -1,22 +1,22 @@
 import type { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import prisma from "@/lib/prisma";
+import bcrypt from "bcrypt"
 
-type HardcodedUser = {
-  id: string
-  name: string
-  username: string
-  password: string
-  role: string
-}
-
-const USERS: HardcodedUser[] = [
-  { id: "1", name: "Admin",   username: "admin",   password: process.env.ADMIN_PASSWORD   ?? "", role: "ADMIN" },
-  { id: "2", name: "Manager", username: "manager", password: process.env.MANAGER_PASSWORD ?? "", role: "MANAGER" },
-  { id: "3", name: "Baker",   username: "baker",   password: process.env.BAKER_PASSWORD   ?? "", role: "BAKER" },
-]
+const DUMMY_HASH = "$2b$10$dummyhashusedtopreventserioususerenumerationtiming0000000"
 
 async function validateUser(username: string, password: string) {
-  return USERS.find(u => u.username === username && u.password === password) ?? null
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: { bakery: { select: { id: true, slug: true } } },
+    });
+    const hashToCompare = user?.passwordHash ?? DUMMY_HASH;
+    const valid = await bcrypt.compare(password, hashToCompare);
+    if (!user || !valid) {
+      throw new Error("unauthorized");
+    }
+    const { passwordHash: _, ...safeUser } = user;
+    return safeUser;
 }
 
 export const authOptions: AuthOptions = {
@@ -40,7 +40,7 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = (user as HardcodedUser).role
+        token.role = (user as any).role
       }
       return token
     },
