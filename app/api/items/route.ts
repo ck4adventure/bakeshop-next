@@ -3,6 +3,21 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { slugify } from '@/lib/utils'
 
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.bakeryId) {
+    return Response.json({ message: 'Unauthorized' }, { status: 401 })
+  }
+
+  const items = await prisma.item.findMany({
+    where: { bakeryId: session.user.bakeryId },
+    include: { category: { select: { id: true, name: true } } },
+    orderBy: { name: 'asc' },
+  })
+
+  return Response.json(items)
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.bakeryId) {

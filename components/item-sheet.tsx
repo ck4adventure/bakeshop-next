@@ -1,4 +1,4 @@
-// ─── Item sheet (add + edit) ──────────────────────────────────────────────────
+'use client';
 
 import { useState, useEffect, useId } from 'react';
 import ModalShell from './modal-shell';
@@ -20,7 +20,7 @@ type Item = {
   category: Category | null;
 };
 
-type SheetState =
+export type SheetState =
   | { mode: 'add' }
   | { mode: 'edit'; item: Item };
 

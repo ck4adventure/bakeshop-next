@@ -17,7 +17,7 @@
   /* Backgrounds */
   --color-bg:             #FAF7F2;
   --color-surface:        #FFFFFF;
-  --color-border:         #E8E0D5;
+  --color-border-subtle:  #E8E0D5;
 
   /* Text */
   --color-text-primary:   #1C1917;
@@ -76,7 +76,7 @@
   /* Backgrounds */
   --color-bg:             #1C1917;
   --color-surface:        #292524;
-  --color-border:         #44403C;
+  --color-border-subtle:  #44403C;
 
   /* Text */
   --color-text-primary:   #FAF7F2;
@@ -152,7 +152,6 @@
 
   /* Design system extras as Tailwind utilities */
   --color-parchment:          var(--color-bg);
-  --color-surface:            var(--color-surface);
   --color-sienna:             var(--color-accent);
   --color-sienna-hover:       var(--color-accent-hover);
 
@@ -192,14 +191,11 @@
 /* ─── Base styles ─────────────────────────────────────────────────────────── */
 @layer base {
   * {
-    border-color: var(--border);
     @apply border-border outline-ring/50;
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-sans), sans-serif;
     font-size: 17px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
