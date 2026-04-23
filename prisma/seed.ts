@@ -1,4 +1,4 @@
-import { InventoryReason, PrismaClient, Role, Weekday } from '@prisma/client'
+import { InventoryReason, PrismaClient, Role, Weekday } from '../app/generated/prisma/client'
 import * as bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
@@ -121,11 +121,11 @@ async function main() {
 
 		// create batch for item to give it a starting quantity
 		// (the trigger on InventoryTransaction projects the delta onto ItemInventory)
-		// const qty = itemResult.id * 10;
-		// await prisma.inventoryTransaction.create({
-		// 	data: { itemId: itemResult.id, quantity: qty, reason: InventoryReason.BATCH }
-		// });
-		// console.log(`batch seeded for: ${itemResult.slug} (qty: ${qty})`);
+		const qty = itemResult.id * 10;
+		await prisma.inventoryTransaction.create({
+			data: { itemId: itemResult.id, quantity: qty, reason: InventoryReason.BATCH }
+		});
+		console.log(`batch seeded for: ${itemResult.slug} (qty: ${qty})`);
 
 		// give item a production schedule
 		// itemId, weekday 0-6, quantity
@@ -136,46 +136,46 @@ async function main() {
 		// 		weekday: Weekday.Sunday
 		// 	}
 		// })
-		// const schedResult = await prisma.productionSchedule.createMany({ skipDuplicates: true,
-		// 	data: [
-		// 		{
-		// 			itemId: itemResult.id,
-		// 			quantity: 0,
-		// 			weekday: Weekday.Monday
-		// 		},
-		// 		{
-		// 			itemId: itemResult.id,
-		// 			quantity: 0,
-		// 			weekday: Weekday.Tuesday
-		// 		},
-		// 		{
-		// 			itemId: itemResult.id,
-		// 			quantity: 10,
-		// 			weekday: Weekday.Wednesday
-		// 		},
-		// 		{
-		// 			itemId: itemResult.id,
-		// 			quantity: 10,
-		// 			weekday: Weekday.Thursday
-		// 		},
-		// 		{
-		// 			itemId: itemResult.id,
-		// 			quantity: 15,
-		// 			weekday: Weekday.Friday
-		// 		},
-		// 		{
-		// 			itemId: itemResult.id,
-		// 			quantity: 15,
-		// 			weekday: Weekday.Saturday
-		// 		},
-		// 		{
-		// 			itemId: itemResult.id,
-		// 			quantity: 10,
-		// 			weekday: Weekday.Sunday
-		// 		}
-		// 	]
-		// })
-		// console.log("production schedule results: ", schedResult)
+		const schedResult = await prisma.productionSchedule.createMany({ skipDuplicates: true,
+			data: [
+				{
+					itemId: itemResult.id,
+					quantity: 0,
+					weekday: Weekday.Monday
+				},
+				{
+					itemId: itemResult.id,
+					quantity: 0,
+					weekday: Weekday.Tuesday
+				},
+				{
+					itemId: itemResult.id,
+					quantity: 10,
+					weekday: Weekday.Wednesday
+				},
+				{
+					itemId: itemResult.id,
+					quantity: 10,
+					weekday: Weekday.Thursday
+				},
+				{
+					itemId: itemResult.id,
+					quantity: 15,
+					weekday: Weekday.Friday
+				},
+				{
+					itemId: itemResult.id,
+					quantity: 15,
+					weekday: Weekday.Saturday
+				},
+				{
+					itemId: itemResult.id,
+					quantity: 10,
+					weekday: Weekday.Sunday
+				}
+			]
+		})
+		console.log("production schedule results: ", schedResult)
 
 	}
 }
