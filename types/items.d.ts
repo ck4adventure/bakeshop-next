@@ -11,3 +11,19 @@ type Item = {
   defaultBatchQty: number | null;
   category: Category | null;
 };
+
+type InventoryItem = {
+  itemId: number;
+  quantity: number;
+  item: Item;
+};
+
+type ScheduleEntry = {
+  itemId: number;
+  weekday: string;
+  quantity: number;
+};
+
+type BakerySettings = {
+  operatingDays: string[];
+};
