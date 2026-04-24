@@ -11,7 +11,7 @@ const TABS = [
 ] as const;
 
 const ADMIN_TABS = [
-	{ label: "Manage Items", icon: "🗂️", href: "/shopid/items" },
+	{ label: "Manage Items", icon: "🗂️", href: "/shopid/manage-items" },
 	{ label: "Settings", icon: "⚙️", href: "/shopid/settings" },
 ] as const;
 
