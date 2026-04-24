@@ -76,7 +76,7 @@ model InventoryTransaction {
   id        Int             @id @default(autoincrement())
   product   Item            @relation(fields: [itemId], references: [id])
   itemId    Int
-  quantity  Int // positive = added to freezer, negative = removed (bake/adjustment)
+  delta  Int // positive = added to freezer, negative = removed (bake/adjustment)
   reason    InventoryReason
   note      String?         // optional explanation (e.g. qty differs from quota)
   createdAt DateTime        @default(now())

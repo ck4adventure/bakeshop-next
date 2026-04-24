@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Plus, Calendar } from 'lucide-react';
 import { ItemSheet, SheetState } from '@/components/item-sheet';
 
-type ScheduleEntry = { itemId: number; weekday: string; quantity: number };
 
 export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);

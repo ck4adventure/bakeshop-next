@@ -123,7 +123,7 @@ async function main() {
 		// (the trigger on InventoryTransaction projects the delta onto ItemInventory)
 		const qty = itemResult.id * 10;
 		await prisma.inventoryTransaction.create({
-			data: { itemId: itemResult.id, quantity: qty, reason: InventoryReason.BATCH }
+			data: { itemId: itemResult.id, delta: qty, reason: InventoryReason.BATCH }
 		});
 		console.log(`batch seeded for: ${itemResult.slug} (qty: ${qty})`);
 
