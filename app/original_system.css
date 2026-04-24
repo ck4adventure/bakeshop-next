@@ -1,12 +1,7 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
-/* ─── Dark mode via data-mode="dark" on <html> (next-themes) ─────────────── */
-@custom-variant dark {
-  &:where([data-mode="dark"], [data-mode="dark"] *) {
-    @slot;
-  }
-}
+/* ─── Dark mode via .dark class on <html> ─────────────────────────────────── */
+@custom-variant dark (&:is(.dark *));
 
 /* ─── Landscape orientation variant ──────────────────────────────────────── */
 @custom-variant landscape (@media (orientation: landscape));
@@ -37,28 +32,26 @@
   --status-zero-text:      #1C1917;
 
   /* ── Shadcn token mappings ── */
-  --background:           #FAF7F2;
-  --foreground:           #1C1917;
-  --card:                 #FFFFFF;
-  --card-foreground:      #1C1917;
-  --popover:              #FFFFFF;
-  --popover-foreground:   #1C1917;
-  --primary:              #C2692A;
-  --primary-foreground:   #FFFFFF;
-  --secondary:            #E8E0D5;
+  --background:         #FAF7F2;
+  --foreground:         #1C1917;
+  --card:               #FFFFFF;
+  --card-foreground:    #1C1917;
+  --primary:            #C2692A;
+  --primary-foreground: #FFFFFF;
+  --secondary:          #E8E0D5;
   --secondary-foreground: #1C1917;
-  --muted:                #E8E0D5;
-  --muted-foreground:     #78716C;
-  --accent:               #FAF7F2;
-  --accent-foreground:    #1C1917;
-  --destructive:          #B91C1C;
-  --border:               #E8E0D5;
-  --input:                #E8E0D5;
-  --ring:                 #C2692A;
-  --radius:               0.75rem;
+  --muted:              #E8E0D5;
+  --muted-foreground:   #78716C;
+  --accent:             #FAF7F2;
+  --accent-foreground:  #1C1917;
+  --destructive:        #B91C1C;
+  --border:             #E8E0D5;
+  --input:              #E8E0D5;
+  --ring:               #C2692A;
+  --radius:             0.75rem;
 }
 
-[data-mode="dark"] {
+.dark {
   /* Backgrounds */
   --color-bg:             #1C1917;
   --color-surface:        #292524;
@@ -83,66 +76,57 @@
   --status-zero-text:      #A8A29E;
 
   /* ── Shadcn token mappings — dark ── */
-  --background:           #1C1917;
-  --foreground:           #FAF7F2;
-  --card:                 #292524;
-  --card-foreground:      #FAF7F2;
-  --popover:              #292524;
-  --popover-foreground:   #FAF7F2;
-  --primary:              #E8875A;
-  --primary-foreground:   #1C1917;
-  --secondary:            #44403C;
+  --background:         #1C1917;
+  --foreground:         #FAF7F2;
+  --card:               #292524;
+  --card-foreground:    #FAF7F2;
+  --primary:            #E8875A;
+  --primary-foreground: #1C1917;
+  --secondary:          #44403C;
   --secondary-foreground: #FAF7F2;
-  --muted:                #44403C;
-  --muted-foreground:     #A8A29E;
-  --accent:               #292524;
-  --accent-foreground:    #FAF7F2;
-  --destructive:          #FCA5A5;
-  --border:               #44403C;
-  --input:                #44403C;
-  --ring:                 #E8875A;
+  --muted:              #44403C;
+  --muted-foreground:   #A8A29E;
+  --accent:             #292524;
+  --accent-foreground:  #FAF7F2;
+  --destructive:        #FCA5A5;
+  --border:             #44403C;
+  --input:              #44403C;
+  --ring:               #E8875A;
 }
 
 /* ─── Tailwind v4 theme registration ──────────────────────────────────────── */
 @theme inline {
   /* Wire Shadcn semantic tokens into Tailwind utilities */
-  --color-background:           var(--background);
-  --color-foreground:           var(--foreground);
-  --color-card:                 var(--card);
-  --color-card-foreground:      var(--card-foreground);
-  --color-popover:              var(--popover);
-  --color-popover-foreground:   var(--popover-foreground);
-  --color-primary:              var(--primary);
-  --color-primary-foreground:   var(--primary-foreground);
-  --color-secondary:            var(--secondary);
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-card:               var(--card);
+  --color-card-foreground:    var(--card-foreground);
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:          var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted:                var(--muted);
-  --color-muted-foreground:     var(--muted-foreground);
-  --color-accent:               var(--accent);
-  --color-accent-foreground:    var(--accent-foreground);
-  --color-destructive:          var(--destructive);
-  --color-border:               var(--border);
-  --color-input:                var(--input);
-  --color-ring:                 var(--ring);
+  --color-muted:              var(--muted);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-accent:             var(--accent);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-destructive:        var(--destructive);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --color-ring:               var(--ring);
 
   /* Design system extras as Tailwind utilities */
-  --color-parchment:            var(--color-bg);
-  --color-surface:              var(--color-surface);
-  --color-sienna:               var(--color-accent);
-  --color-sienna-hover:         var(--color-accent-hover);
+  --color-parchment:          var(--color-bg);
+  --color-surface:            var(--color-surface);
+  --color-sienna:             var(--color-accent);
+  --color-sienna-hover:       var(--color-accent-hover);
 
   /* Radii */
   --radius-card: 12px;
   --radius-pill: 9999px;
-  --radius-sm:   calc(var(--radius) * 0.6);
-  --radius-md:   calc(var(--radius) * 0.8);
-  --radius-lg:   var(--radius);
 
   /* Touch-target sizing */
   --spacing-tap:        56px;
   --spacing-bottom-nav: 64px;
-
-  --font-sans: var(--font-sans);
 }
 
 /* ─── Base styles ─────────────────────────────────────────────────────────── */
@@ -154,7 +138,7 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-sans), 'DM Sans', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     font-size: 17px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;

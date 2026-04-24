@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useId } from 'react';
+import { useState, useId } from 'react';
 import ModalShell from './modal-shell';
 import NumericField from './numeric-field';
 import InfoTooltip from './info-tooltip';
@@ -24,12 +24,11 @@ export type SheetState =
   | { mode: 'add' }
   | { mode: 'edit'; item: Item };
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
-type Weekday = typeof WEEKDAYS[number];
-
 export function ItemSheet({
   state,
   categories,
+  operatingDays,
+  initialSchedule,
   onClose,
   onSaved,
   onDeleted,
@@ -37,8 +36,10 @@ export function ItemSheet({
 }: {
   state: SheetState;
   categories: Category[];
+  operatingDays: string[];
+  initialSchedule: Record<string, number>;
   onClose: () => void;
-  onSaved: (item: Item) => void;
+  onSaved: (item: Item, savedSchedule: Record<string, number>) => void;
   onDeleted?: (id: number) => void;
   onCategoryCreated: (cat: Category) => void;
 }) {
@@ -63,45 +64,9 @@ export function ItemSheet({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [operatingDays, setOperatingDays] = useState<Weekday[]>([]);
-  const [scheduleInputs, setScheduleInputs] = useState<Record<string, string>>({});
-  const [originalSchedule, setOriginalSchedule] = useState<Record<string, number>>({});
-  const [settingsLoading, setSettingsLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [settingsRes, schedRes] = await Promise.all([
-          fetch('/api/bakery/settings'),
-          state.mode === 'edit'
-            ? fetch('/api/production-schedule')
-            : Promise.resolve(null),
-        ]);
-
-        const settingsData: { operatingDays: Weekday[] } = settingsRes.ok
-          ? await settingsRes.json()
-          : { operatingDays: [] };
-        setOperatingDays(settingsData.operatingDays);
-
-        if (state.mode === 'edit' && schedRes?.ok) {
-          const schedData: { itemId: number; weekday: string; quantity: number }[] = await schedRes.json();
-          const orig: Record<string, number> = {};
-          for (const entry of schedData) {
-            if (entry.itemId === state.item.id) orig[entry.weekday] = entry.quantity;
-          }
-          setOriginalSchedule(orig);
-          const inputs: Record<string, string> = {};
-          for (const [day, qty] of Object.entries(orig)) inputs[day] = String(qty);
-          setScheduleInputs(inputs);
-        }
-      } catch {
-        // silently fail — schedule section will just not appear
-      } finally {
-        setSettingsLoading(false);
-      }
-    };
-    load();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [scheduleInputs, setScheduleInputs] = useState<Record<string, string>>(
+    Object.fromEntries(Object.entries(initialSchedule).map(([day, qty]) => [day, String(qty)]))
+  );
 
   const parsedPar = parInput.trim() === '' ? null : parseInt(parInput, 10);
   const parValid = parInput.trim() === '' || (!isNaN(parsedPar!) && parsedPar! >= 0);
@@ -133,7 +98,6 @@ export function ItemSheet({
     setSaving(true);
     setError(null);
     try {
-      // If adding a new category, create it first
       let resolvedCategoryId: number | null = null;
       if (isAddingNew) {
         const catRes = await fetch('/api/categories', {
@@ -186,6 +150,8 @@ export function ItemSheet({
       if (operatingDays.length > 0) {
         const itemId = saved.id;
         const scheduleOps: Promise<void>[] = [];
+        const operatingDaysSet = new Set(operatingDays);
+
         for (const day of operatingDays) {
           const val = (scheduleInputs[day] ?? '').trim();
           const qty = val === '' ? null : parseInt(val, 10);
@@ -197,7 +163,7 @@ export function ItemSheet({
                 body: JSON.stringify({ itemId, weekday: day, quantity: qty }),
               }).then(() => {}),
             );
-          } else if (qty === null && originalSchedule[day] !== undefined) {
+          } else if (qty === null && initialSchedule[day] !== undefined) {
             scheduleOps.push(
               fetch(`/api/production-schedule/${itemId}/${day}`, {
                 method: 'DELETE',
@@ -205,10 +171,30 @@ export function ItemSheet({
             );
           }
         }
+
+        // Delete stale entries for days no longer in operating days
+        for (const day of Object.keys(initialSchedule)) {
+          if (!operatingDaysSet.has(day)) {
+            scheduleOps.push(
+              fetch(`/api/production-schedule/${itemId}/${day}`, {
+                method: 'DELETE',
+              }).then(() => {}),
+            );
+          }
+        }
+
         await Promise.all(scheduleOps);
       }
 
-      onSaved(saved);
+      // Build the schedule state as it now exists in the DB
+      const savedSchedule: Record<string, number> = {};
+      for (const day of operatingDays) {
+        const val = (scheduleInputs[day] ?? '').trim();
+        const qty = val === '' ? null : parseInt(val, 10);
+        if (qty !== null && !isNaN(qty)) savedSchedule[day] = qty;
+      }
+
+      onSaved(saved, savedSchedule);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -287,12 +273,12 @@ export function ItemSheet({
         </div>
 
         {/* Bakeoff qty by day */}
-        {!settingsLoading && operatingDays.length > 0 && (
+        {operatingDays.length > 0 && (
           <div className="mb-4">
             <p className="text-sm font-medium text-foreground mb-2">
               Bakeoff qty by day <span className="text-muted-foreground font-normal">(optional)</span>
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {operatingDays.map(day => (
                 <div key={day} className="flex flex-col items-center gap-1">
                   <span className="text-xs text-muted-foreground">{day.slice(0, 3)}</span>

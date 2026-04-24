@@ -1,45 +1,46 @@
 'use client';
 
-import { useState, useEffect, useId } from 'react';
-// import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus, Calendar } from 'lucide-react';
-import { ItemSheet } from '@/components/item-sheet';
-import { SheetState } from '@/components/item-sheet';
-export default function ItemsPage() {
-  // const router = useRouter();
+import { useState, useEffect } from 'react';
+import { Plus, Calendar } from 'lucide-react';
+import { ItemSheet, SheetState } from '@/components/item-sheet';
 
+type ScheduleEntry = { itemId: number; weekday: string; quantity: number };
+
+export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [scheduledItemIds, setScheduledItemIds] = useState<Set<number>>(new Set());
+  const [scheduleEntries, setScheduleEntries] = useState<ScheduleEntry[]>([]);
+  const [operatingDays, setOperatingDays] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [sheet, setSheet] = useState<SheetState | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<number | null>(null);
 
+  const scheduledItemIds = new Set(
+    scheduleEntries.filter(e => e.quantity > 0).map(e => e.itemId)
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [itemsRes, catsRes, schedRes] = await Promise.all([
+        const [itemsRes, catsRes, schedRes, settingsRes] = await Promise.all([
           fetch(`/api/items`, { credentials: 'include' }),
           fetch(`/api/categories`, { credentials: 'include' }),
           fetch(`/api/production-schedule`, { credentials: 'include' }),
+          fetch(`/api/bakery/settings`, { credentials: 'include' }),
         ]);
         if (!itemsRes.ok) throw new Error('Failed to load items');
-        const [itemsData, catsData, schedData] = await Promise.all([
+        const [itemsData, catsData, schedData, settingsData] = await Promise.all([
           itemsRes.json(),
           catsRes.ok ? catsRes.json() : [],
           schedRes.ok ? schedRes.json() : [],
+          settingsRes.ok ? settingsRes.json() : { operatingDays: [] },
         ]);
         setItems(itemsData);
         setCategories(catsData);
-        const ids = new Set<number>(
-          (schedData as { itemId: number; quantity: number }[])
-            .filter(e => e.quantity > 0)
-            .map(e => e.itemId)
-        );
-        setScheduledItemIds(ids);
-	
+        setScheduleEntries(schedData);
+        setOperatingDays(settingsData.operatingDays ?? []);
       } catch (err) {
         setFetchError(err instanceof Error ? err.message : 'Something went wrong');
       } finally {
@@ -54,9 +55,7 @@ export default function ItemsPage() {
     setTimeout(() => setToast(null), 2800);
   };
 
-	
-
-  const handleSaved = (saved: Item) => {
+  const handleSaved = (saved: Item, savedSchedule: Record<string, number>) => {
     const isNew = !items.some(i => i.id === saved.id);
     setItems(prev => {
       const idx = prev.findIndex(i => i.id === saved.id);
@@ -64,13 +63,10 @@ export default function ItemsPage() {
         ? prev.map(i => i.id === saved.id ? saved : i)
         : [...prev, saved];
     });
-    // Re-fetch schedule so the calendar icon reflects any changes made in the sheet
-    fetch(`/api/production-schedule`, { credentials: 'include' })
-      .then(r => r.ok ? r.json() : [])
-      .then((schedData: { itemId: number; quantity: number }[]) => {
-        setScheduledItemIds(new Set(schedData.filter(e => e.quantity > 0).map(e => e.itemId)));
-      })
-      .catch(() => {});
+    setScheduleEntries(prev => [
+      ...prev.filter(e => e.itemId !== saved.id),
+      ...Object.entries(savedSchedule).map(([weekday, quantity]) => ({ itemId: saved.id, weekday, quantity })),
+    ]);
     showToast(isNew ? `${saved.name} added` : `${saved.name} updated`);
     setSheet(null);
   };
@@ -78,6 +74,7 @@ export default function ItemsPage() {
   const handleDeleted = (id: number) => {
     const item = items.find(i => i.id === id);
     setItems(prev => prev.filter(i => i.id !== id));
+    setScheduleEntries(prev => prev.filter(e => e.itemId !== id));
     showToast(`${item?.name ?? 'Item'} deleted`);
     setSheet(null);
   };
@@ -86,49 +83,37 @@ export default function ItemsPage() {
     setCategories(prev => [...prev, cat].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
-  // Derive the categories that actually have items (for chip visibility)
   const categoriesWithItems = categories.filter(cat => items.some(i => i.category?.id === cat.id));
   const hasUncategorized = items.some(i => i.category === null);
 
-	console.log("items: ", items)
-
-  // Build grouped list based on active filter
   const filteredItems = activeFilter !== null
     ? items.filter(i => i.category?.id === activeFilter)
     : items;
 
-  // Group by category: categorized groups sorted by category name, then uncategorized at end
   const groupedItems: { label: string; items: Item[] }[] = [];
-  const seen = new Set<number>();
 
   for (const cat of categories) {
     const group = filteredItems.filter(i => i.category?.id === cat.id);
-    if (group.length > 0) {
-      groupedItems.push({ label: cat.name, items: group });
-      seen.add(cat.id);
-    }
+    if (group.length > 0) groupedItems.push({ label: cat.name, items: group });
   }
 
   if (activeFilter === null) {
     const uncategorized = filteredItems.filter(i => i.category === null);
-    if (uncategorized.length > 0) {
-      groupedItems.push({ label: 'Uncategorized', items: uncategorized });
-    }
+    if (uncategorized.length > 0) groupedItems.push({ label: 'Uncategorized', items: uncategorized });
   }
 
   const showChips = !loading && !fetchError && (categoriesWithItems.length > 0 || hasUncategorized);
-	console.log("scheduled ids: ", scheduledItemIds)
+
+  const itemSchedule = sheet?.mode === 'edit'
+    ? Object.fromEntries(
+        scheduleEntries.filter(e => e.itemId === sheet.item.id).map(e => [e.weekday, e.quantity])
+      )
+    : {};
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-card border-b border-border px-4 pt-5 pb-3 flex items-center gap-3">
-        {/* <button
-          onClick={() => router.push("/")}
-          aria-label="Go back"
-          className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-        >
-          <ArrowLeft size={20} />
-        </button> */}
         <div>
           <h1 className="text-[22px] font-bold text-foreground leading-none">Items</h1>
           {!loading && !fetchError && (
@@ -233,6 +218,8 @@ export default function ItemsPage() {
         <ItemSheet
           state={sheet}
           categories={categories}
+          operatingDays={operatingDays}
+          initialSchedule={itemSchedule}
           onClose={() => setSheet(null)}
           onSaved={handleSaved}
           onDeleted={handleDeleted}
