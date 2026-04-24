@@ -41,6 +41,7 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id
         token.role = (user as any).role
+        token.bakeryId = (user as any).bakery?.id ?? null
       }
       return token
     },
@@ -48,6 +49,7 @@ export const authOptions: AuthOptions = {
       if (session.user) {
         session.user.id = token.id
         session.user.role = token.role
+        session.user.bakeryId = token.bakeryId
       }
       return session
     },

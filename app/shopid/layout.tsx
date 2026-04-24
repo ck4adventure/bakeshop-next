@@ -10,7 +10,7 @@ export default async function Layout({
 }) {
 
 	return (
-		<div>
+		<div className="bg-parchment">
 			<Header />
 			<Nav />
 			<main className="pt-14 md:pl-56 landscape:pl-56 pb-16 md:pb-0 landscape:pb-0">{children}</main>

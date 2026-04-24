@@ -9,7 +9,7 @@ const FOCUSABLE = [
 	'[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
-export function ModalShell({
+export default function ModalShell({
   onClose,
   children,
   maxWidth = 'max-w-[430px]',
