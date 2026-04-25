@@ -325,7 +325,7 @@ export default function SchedulePage() {
   const [allOverrides, setAllOverrides] = useState<AllOverrides>({});
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [focusedDate, setFocusedDate] = useState<string | null>(null);
-  const [activeDate, setActiveDate] = useState<string | null>(null);
+  const [activeDate, setActiveDate] = useState<string>(() => getUpcomingDates()[0].dateStr);
   const datePickerRef = useRef<HTMLInputElement>(null);
 
   // Override sheet state
