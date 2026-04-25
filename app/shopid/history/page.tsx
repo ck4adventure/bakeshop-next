@@ -7,9 +7,10 @@ type HistoryEntry = {
   id: number;
   itemId: number;
   quantity: number;
+  stockAfter: number;
   note: string | null;
   createdAt: string;
-  type: 'batch' | 'adjustment';
+  type: 'batch' | 'bake' | 'adjustment';
   product: { name: string; slug: string };
 };
 
@@ -56,7 +57,6 @@ function groupByDay(entries: HistoryEntry[]): { label: string; items: HistoryEnt
 
 export default function HistoryPage() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
-  const [invMap, setInvMap] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -65,9 +65,8 @@ export default function HistoryPage() {
       try {
         const res = await fetch('/api/inventory/history', { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to load history');
-        const { entries, invMap }: { entries: HistoryEntry[]; invMap: Record<number, number> } = await res.json();
-        setEntries(entries);
-        setInvMap(invMap);
+        const data: HistoryEntry[] = await res.json();
+        setEntries(data);
       } catch (err) {
         setFetchError(err instanceof Error ? err.message : 'Something went wrong');
       } finally {
@@ -111,9 +110,9 @@ export default function HistoryPage() {
 
             <div className="flex flex-col gap-2">
               {group.items.map(entry => {
-                const isAdjustment = entry.type === 'adjustment';
                 const qtyDisplay = entry.quantity > 0 ? `+${entry.quantity}` : String(entry.quantity);
                 const qtyColor = entry.quantity < 0 ? 'text-destructive' : 'text-foreground';
+                const badge = entry.type === 'adjustment' ? 'Adjustment' : entry.type === 'bake' ? 'Bake' : null;
 
                 return (
                   <div
@@ -126,14 +125,14 @@ export default function HistoryPage() {
                           <span className="text-[17px] font-medium text-foreground truncate">
                             {entry.product.name}
                           </span>
-                          {isAdjustment && (
+                          {badge && (
                             <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                              Adjustment
+                              {badge}
                             </span>
                           )}
                         </div>
                         <div className="text-[13px] text-muted-foreground mt-0.5">
-                          {invMap[entry.itemId] ?? 0} in freezer
+                          {entry.stockAfter} in freezer
                         </div>
                         {entry.note && (
                           <div className="text-[13px] text-muted-foreground mt-0.5">

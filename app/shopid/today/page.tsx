@@ -335,7 +335,8 @@ export default function TodayPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const todayDateStr = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         const [invRes, schedRes, catsRes, todayBakesRes, overridesRes] = await Promise.all([
           fetch(`/api/inventory`, { credentials: 'include' }),
           fetch(`/api/production-schedule`, { credentials: 'include' }),

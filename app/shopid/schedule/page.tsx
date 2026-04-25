@@ -27,19 +27,21 @@ function getTodayIdx(): number {
 }
 
 function toDateStr(d: Date): string {
-  return d.toISOString().split('T')[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
-function getUpcomingDates(): { label: string; dateStr: string; weekdayIdx: number; isToday: boolean }[] {
+function getUpcomingDates(): { label: string; dateStr: string; weekdayIdx: number }[] {
   const today = new Date();
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
-    d.setDate(today.getDate() + i);
+    d.setDate(today.getDate() + i + 1);
     return {
-      label: i === 0 ? 'Today' : i === 1 ? 'Tmrw' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+      label: i === 0 ? 'Tmrw' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
       dateStr: toDateStr(d),
       weekdayIdx: d.getDay(),
-      isToday: i === 0,
     };
   });
 }
@@ -323,6 +325,7 @@ export default function SchedulePage() {
   const [allOverrides, setAllOverrides] = useState<AllOverrides>({});
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [focusedDate, setFocusedDate] = useState<string | null>(null);
+  const [activeDate, setActiveDate] = useState<string | null>(null);
   const datePickerRef = useRef<HTMLInputElement>(null);
 
   // Override sheet state
@@ -330,7 +333,6 @@ export default function SchedulePage() {
     item: Item;
     dateStr: string;
     dateLabel: string;
-    isToday: boolean;
     existingEntry: OverrideEntry | null;
   } | null>(null);
 
@@ -487,7 +489,7 @@ export default function SchedulePage() {
   const summaryDates = [
     ...filteredUpcomingDates,
     ...(focusedDate && !filteredUpcomingDates.find(d => d.dateStr === focusedDate)
-      ? [{ label: focusedDate, dateStr: focusedDate, weekdayIdx: new Date(focusedDate + 'T00:00:00').getDay(), isToday: false }]
+      ? [{ label: focusedDate, dateStr: focusedDate, weekdayIdx: new Date(focusedDate + 'T00:00:00').getDay() }]
       : []),
   ];
 
@@ -550,14 +552,17 @@ export default function SchedulePage() {
                     <button
                       key={d.dateStr}
                       onClick={() => {
+                        setActiveDate(d.dateStr);
                         document.getElementById(`day-${d.dateStr}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
                       className={`flex flex-col items-center px-3 py-1.5 rounded-full border text-[13px] font-medium cursor-pointer transition-colors shrink-0 ${
-                        d.isToday ? 'bg-transparent text-muted-foreground border-border opacity-60' : 'bg-transparent text-muted-foreground border-border'
+                        activeDate === d.dateStr
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-transparent text-muted-foreground border-border'
                       }`}
                     >
-                      <span>{d.isToday ? `🔒 ${d.label}` : d.label}</span>
-                      {hasChanges && <span className="w-1 h-1 rounded-full mt-0.5 bg-primary" />}
+                      <span>{d.label}</span>
+                      {hasChanges && <span className={`w-1 h-1 rounded-full mt-0.5 ${activeDate === d.dateStr ? 'bg-primary-foreground' : 'bg-primary'}`} />}
                     </button>
                   );
                 })}
@@ -642,14 +647,11 @@ export default function SchedulePage() {
             const scheduledItems = items.filter(item => dayTemplate[item.id] !== undefined);
 
             return (
-              <section key={d.dateStr} id={`day-${d.dateStr}`}>
+              <section key={d.dateStr} id={`day-${d.dateStr}`} className="scroll-mt-32">
                 <div className="flex justify-between items-baseline mb-2">
                   <h2 className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {formatSectionDate(d.dateStr)}
                   </h2>
-                  {d.isToday && (
-                    <span className="text-[11px] text-muted-foreground">🔒 locked</span>
-                  )}
                 </div>
 
                 {scheduledItems.length === 0 ? (
@@ -671,7 +673,6 @@ export default function SchedulePage() {
                             item,
                             dateStr: d.dateStr,
                             dateLabel: d.label,
-                            isToday: d.isToday,
                             existingEntry: override,
                           })}
                           className="w-full bg-card border border-border rounded-[12px] px-4 py-3.5 flex justify-between items-center text-left cursor-pointer hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)] transition-[transform,box-shadow] duration-150"
@@ -731,7 +732,7 @@ export default function SchedulePage() {
           dateLabel={dailySheet.dateLabel}
           templateQty={scheduleMap[WEEKDAYS[new Date(dailySheet.dateStr + 'T00:00:00').getDay()]]?.[dailySheet.item.id] ?? null}
           existingEntry={dailySheet.existingEntry}
-          locked={dailySheet.isToday}
+          locked={false}
           onClose={() => setDailySheet(null)}
           onSaved={(itemId, quantity, specialOrderQty) => handleDailySaved(dailySheet.dateStr, itemId, quantity, specialOrderQty)}
           onRemoved={(itemId) => handleDailyRemoved(dailySheet.dateStr, itemId)}

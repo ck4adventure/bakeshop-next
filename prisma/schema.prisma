@@ -73,13 +73,14 @@ model Item {
 }
 
 model InventoryTransaction {
-  id        Int             @id @default(autoincrement())
-  product   Item            @relation(fields: [itemId], references: [id])
-  itemId    Int
-  delta  Int // positive = added to freezer, negative = removed (bake/adjustment)
-  reason    InventoryReason
-  note      String?         // optional explanation (e.g. qty differs from quota)
-  createdAt DateTime        @default(now())
+  id         Int             @id @default(autoincrement())
+  product    Item            @relation(fields: [itemId], references: [id])
+  itemId     Int
+  delta      Int             // positive = added to freezer, negative = removed (bake/adjustment)
+  stockAfter Int             @default(0) // set by DB trigger; stock level after this transaction
+  reason     InventoryReason
+  note       String?
+  createdAt  DateTime        @default(now())
 }
 
 model ItemInventory {

@@ -8,29 +8,22 @@ export async function GET() {
     return Response.json({ message: 'Unauthorized' }, { status: 401 })
   }
 
-  const [transactions, inventory] = await Promise.all([
-    prisma.inventoryTransaction.findMany({
-      where: { product: { bakeryId: session.user.bakeryId } },
-      include: { product: { select: { name: true, slug: true } } },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.itemInventory.findMany({
-      where: { item: { bakeryId: session.user.bakeryId } },
-      select: { itemId: true, quantity: true },
-    }),
-  ])
-
-  const invMap = Object.fromEntries(inventory.map(r => [r.itemId, r.quantity]))
+  const transactions = await prisma.inventoryTransaction.findMany({
+    where: { product: { bakeryId: session.user.bakeryId } },
+    include: { product: { select: { name: true, slug: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
 
   const entries = transactions.map(t => ({
     id: t.id,
     itemId: t.itemId,
     quantity: t.delta,
+    stockAfter: t.stockAfter,
     note: t.note,
     createdAt: t.createdAt.toISOString(),
-    type: t.reason === 'BATCH' ? 'batch' : 'adjustment',
+    type: t.reason === 'BATCH' ? 'batch' : t.reason === 'BAKE' ? 'bake' : 'adjustment',
     product: t.product,
   }))
 
-  return Response.json({ entries, invMap })
+  return Response.json(entries)
 }
