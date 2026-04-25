@@ -11,10 +11,15 @@ export async function GET() {
 
   const bakery = await prisma.bakery.findUnique({
     where: { id: session.user.bakeryId },
-    select: { operatingDays: true },
+    select: { id: true, name: true, slug: true, operatingDays: true },
   })
 
-  return Response.json({ operatingDays: bakery?.operatingDays ?? [] })
+  return Response.json({
+    id: bakery?.id,
+    name: bakery?.name,
+    slug: bakery?.slug,
+    operatingDays: bakery?.operatingDays ?? [],
+  })
 }
 
 export async function PATCH(request: Request) {

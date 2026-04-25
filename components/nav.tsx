@@ -15,16 +15,10 @@ const ADMIN_TABS = [
 	{ label: "Settings", icon: "⚙️", href: "/shopid/settings" },
 ] as const;
 
-const ADMIN_ONLY_TABS = [
-	{ label: "Operating Days", icon: "📆", href: "/shopid/operating-days" },
-] as const;
-
 export default async function Nav() {
 	const session = await getServerSession(authOptions)
-	const isAdmin = session?.user?.role === 'ADMIN';
-	const canManage = isAdmin || session?.user?.role === 'MANAGER';
-	const visibleAdminTabs = isAdmin ? [...ADMIN_TABS, ...ADMIN_ONLY_TABS] : [...ADMIN_TABS];
-	const sidebarTabs = canManage ? [...TABS, ...visibleAdminTabs] : TABS;
+	const canManage = session?.user?.role === 'ADMIN' || session?.user?.role === 'MANAGER';
+	const sidebarTabs = canManage ? [...TABS, ...ADMIN_TABS] : TABS;
 
 	return (
 		<>
@@ -37,7 +31,7 @@ export default async function Nav() {
 				</div>
 			</aside>
 
-			<BottomNav tabs={[...TABS]} adminTabs={visibleAdminTabs} canManage={canManage} />
+			<BottomNav tabs={[...TABS]} adminTabs={[...ADMIN_TABS]} canManage={canManage} />
 		</>
 	)
 }

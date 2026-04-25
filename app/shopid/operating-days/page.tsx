@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
@@ -59,13 +60,13 @@ export default function OperatingDaysPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-card border-b border-border px-4 pt-5 pb-3 flex items-center gap-3">
-        {/* <button
-          onClick={() => navigate(-1)}
+        <Link
+          href="/shopid/settings"
           aria-label="Go back"
-          className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer text-lg"
+          className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-lg"
         >
           ←
-        </button> */}
+        </Link>
         <div>
           <h1 className="text-[22px] font-bold text-foreground leading-none">Operating Days</h1>
           <p className="text-[13px] text-muted-foreground mt-0.5">Days your bakery is open</p>
