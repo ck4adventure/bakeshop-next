@@ -9,93 +9,48 @@ export default async function Home() {
 	if (session) redirect("/shopid")
 
 	return (
-				<div className='flex flex-col justify-center items-center m-0'>
+		<div className="flex flex-col min-h-screen bg-background">
 			{/* Header Bar */}
-			<header className="w-full bg-white shadow flex items-center justify-between px-8 py-4">
+			<header className="w-full bg-card border-b border-border flex items-center justify-between px-8 py-4">
 				<div className="flex items-center gap-2">
 					<Image src="/cookies_clear.png" alt="Logo" width={32} height={32} />
-					<span className="text-xl font-bold text-blue-900">Bakedown</span>
+					<span className="text-xl font-bold text-foreground">The Daily Bake</span>
 				</div>
-				<nav className="flex items-center gap-6">
-					<Link href="#features" className="text-blue-800 hover:text-blue-600 font-medium">Features</Link>
-					<Link href="#about" className="text-blue-800 hover:text-blue-600 font-medium">About</Link>
-					<Link href="#contact" className="text-blue-800 hover:text-blue-600 font-medium">Contact</Link>
-				</nav>
 				<div>
-					<Link href="/login" className="ml-2 px-4 py-2 border border-blue-700 text-blue-700 rounded hover:bg-blue-50 transition font-semibold">Log In</Link>
-					<Link href="/signup" className="ml-4 px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition font-semibold">Sign Up</Link>
+					<Link href="/login" className="px-4 py-2 border border-primary text-primary rounded-full hover:bg-primary/10 transition font-semibold text-sm">
+						Log In
+					</Link>
 				</div>
 			</header>
-		<main className="w-full max-w-4xl mt-8 flex flex-col gap-12">
-			{/* Jumbotron / Hero Section */}
-			<section className="flex flex-col items-center text-center py-12 bg-blue-50 rounded-lg shadow">
-				<Image
-					src="/chartv1.png"
-					alt="Business Hero"
-					width={600}
-					height={300}
-					className="mb-4"
-					loading="eager"
-				/>
-				<h1 className="text-4xl font-bold text-blue-900 mb-2">Inventory Management for Bakeries</h1>
-				<p className="text-lg text-blue-700 mb-4">
-					We help you keep the right balance of stock on hand with our amazing products and services.
-				</p>
-				<button className="px-6 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition">
-					Get Started
-				</button>
-			</section>
 
-			{/* Features Section */}
-			<section className="grid grid-cols-1 md:grid-cols-3 gap-6" id="features">
-				<div className="bg-white p-6 rounded shadow text-center">
-					<h2 className="font-semibold text-blue-800 mb-2">Inventory Forecasting</h2>
-					<p className="text-blue-600">Easily see current inventory levels and the forecasted usage.</p>
-				</div>
-				<div className="bg-white p-6 rounded shadow text-center">
-					<h2 className="font-semibold text-blue-800 mb-2">Daily Bakeoff Lists</h2>
-					<p className="text-blue-600">View what's on order for the day.</p>
-				</div>
-				<div className="bg-white p-6 rounded shadow text-center">
-					<h2 className="font-semibold text-blue-800 mb-2">Batch Creation</h2>
-					<p className="text-blue-600">One-click to add a batch to re-up inventory.</p>
-				</div>
-			</section>
-
-			{/* About / Another Section */}
-			<section className="bg-blue-100 p-8 rounded shadow text-center" id="about">
-				<h2 className="text-2xl font-bold text-blue-900 mb-2">About Our Business</h2>
-				<p className="text-blue-700">
-					We have years of experience delivering quality solutions to our customers. Learn more about our story and values.
-				</p>
-			</section>
-
-			{/* Email Signup Section */}
-			<section className="bg-white p-8 rounded shadow flex flex-col items-center" id="signup">
-				<h2 className="text-xl font-semibold text-blue-800 mb-2">Stay Updated</h2>
-				<p className="text-blue-600 mb-4">Sign up for our newsletter to get the latest news and offers.</p>
-				<form className="flex flex-col sm:flex-row gap-2 w-full max-w-md">
-					<input
-						type="email"
-						placeholder="Your email address"
-						className="flex-1 px-4 py-2 border border-blue-300 rounded"
+			<main className="flex-1 w-full max-w-4xl mx-auto px-4 pt-10 pb-16 flex flex-col gap-12">
+				{/* Hero Section */}
+				<section className="flex flex-col items-center text-center py-12 bg-card border border-border rounded-[12px]">
+					<Image
+						src="/chartv1.png"
+						alt="Business Hero"
+						width={600}
+						height={300}
+						className="mb-6"
+						loading="eager"
 					/>
-					<button
-						type="submit"
-						className="px-6 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition"
-					>
-						Subscribe
-					</button>
-				</form>
-			</section>
-		</main>
-					{/* Basic Footer */}
-			<footer className="w-full bg-white border-t mt-12 py-6 flex flex-col md:flex-row items-center justify-between px-8 text-blue-700 text-sm">
-				<span>&copy; {new Date().getFullYear()} Bakedown. All rights reserved.</span>
+					<h1 className="text-4xl font-bold text-foreground mb-3">Inventory Management for Bakeries</h1>
+					<p className="text-lg text-muted-foreground mb-6 max-w-xl">
+						Keep the right balance of stock on hand — track daily bakes, plan your schedule, and stay ahead of demand.
+					</p>
+					<Link href="/login" className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full hover:bg-sienna-hover transition font-semibold">
+						Get Started
+					</Link>
+				</section>
+			</main>
+
+			{/* Footer */}
+			<footer className="w-full bg-card border-t border-border py-6 flex flex-col md:flex-row items-center justify-between px-8 text-muted-foreground text-sm">
+				<span>&copy; {new Date().getFullYear()} The Daily Bake. All rights reserved.</span>
 				<div className="flex gap-4 mt-2 md:mt-0">
-					<Link href="#privacy" className="hover:underline">Privacy Policy</Link>
-					<Link href="#terms" className="hover:underline">Terms of Service</Link>
-					<Link href="#contact" className="hover:underline">Contact</Link>
+					{/* <Link href="#privacy" className="hover:text-foreground transition">Privacy Policy</Link>
+					<Link href="#terms" className="hover:text-foreground transition">Terms of Service</Link>
+					<Link href="#contact" className="hover:text-foreground transition">Contact</Link> */}
 				</div>
 			</footer>
 		</div>
