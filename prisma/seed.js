@@ -60,7 +60,7 @@ async function main() {
     console.log(`bakery seeded: ${bakery.slug}`);
     for (const u of users_demo_data) {
         const passwordHash = await bcrypt.hash(u.password, SALT_ROUNDS);
-        const email = `${u.username}@bakeshop.dev`;
+        const email = `${u.username}@thedailybake.dev`;
         await prisma.user.upsert({
             where: { username: u.username },
             update: { email, passwordHash, bakeryId: bakery.id },

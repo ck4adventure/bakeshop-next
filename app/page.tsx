@@ -39,7 +39,7 @@ export default async function Home() {
 						Keep the right balance of stock on hand — track daily bakes, plan your schedule, and stay ahead of demand.
 					</p>
 					<Link href="/login" className="px-6 py-2.5 bg-primary text-primary-foreground rounded-full hover:bg-sienna-hover transition font-semibold">
-						Get Started
+						Interactive Demo
 					</Link>
 				</section>
 			</main>

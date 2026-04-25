@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const dmSans = DM_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "Bakeshop App",
+  title: "The Daily Bake App",
   description: "Inventory and Daily Quotas for Bakeshops and Cafes",
 };
 
