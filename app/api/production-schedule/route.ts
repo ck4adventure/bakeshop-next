@@ -11,6 +11,7 @@ export async function GET() {
 
   const schedules = await prisma.productionSchedule.findMany({
     where: { item: { bakeryId: session.user.bakeryId } },
+    include: { item: { select: { name: true, slug: true } } },
   })
 
   return Response.json(schedules)
