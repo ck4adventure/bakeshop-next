@@ -436,7 +436,7 @@ export default function InventoryPage() {
   const handleConfirmBatch = async (item: InventoryItem, count: number) => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/batches`, {
+      const res = await fetch(`/api/inventory/batches`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

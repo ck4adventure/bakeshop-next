@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   }
 
   const transaction = await prisma.inventoryTransaction.create({
-    data: { itemId, delta: quantity, reason: 'BATCH' },
+    data: { itemId, delta: quantity, reason: 'BATCH', note: 'batch added' },
   })
 
   return Response.json(transaction, { status: 201 })
