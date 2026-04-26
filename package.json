@@ -7,16 +7,17 @@
     "build": "prisma migrate deploy && prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-		"postinstall": "prisma generate",
-		"db:seed": "tsx prisma/seed.ts",
-		"db:seed:private": "tsx prisma/seed-private.ts"
+    "postinstall": "prisma generate",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:private": "tsx prisma/seed-private.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.19.3",
-    "bcrypt": "^6.0.0",
+    "@prisma/nextjs-monorepo-workaround-plugin": "^7.8.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.8.0",
