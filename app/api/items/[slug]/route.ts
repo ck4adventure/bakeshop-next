@@ -15,7 +15,7 @@ export async function PATCH(
   const { name, par, defaultBatchQty, categoryId } = await req.json()
 
   const item = await prisma.item.update({
-    where: { slug, bakeryId: session.user.bakeryId },
+    where: { slug_bakeryId: { slug, bakeryId: session.user.bakeryId } },
     data: {
       name: name?.trim(),
       par: par ?? null,
@@ -40,7 +40,7 @@ export async function DELETE(
   const { slug } = await params
 
   await prisma.item.delete({
-    where: { slug, bakeryId: session.user.bakeryId },
+    where: { slug_bakeryId: { slug, bakeryId: session.user.bakeryId } },
   })
 
   return new Response(null, { status: 204 })
