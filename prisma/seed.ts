@@ -1,6 +1,7 @@
 import { InventoryReason, PrismaClient, Role, Weekday } from '../app/generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 import * as bcrypt from 'bcrypt'
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })
 
 const SALT_ROUNDS = 10
 
