@@ -94,7 +94,7 @@ async function main() {
 
 		// create item (skip if already exists), always link to bakery
 		const itemResult = await prisma.item.upsert({
-			where: { slug: item.slug },
+			where: { slug_bakeryId: { slug: item.slug, bakeryId: bakery.id } },
 			update: { bakeryId: bakery.id, ...(categoryId && { categoryId }) },
 			create: { name: item.name, slug: item.slug, bakeryId: bakery.id, ...(categoryId && { categoryId }) },
 		});

@@ -57,7 +57,7 @@ model Category {
 model Item {
   id              Int                    @id @default(autoincrement())
   name            String
-  slug            String                 @unique
+  slug            String
   par             Int?
   defaultBatchQty Int?
   bakery          Bakery?                @relation(fields: [bakeryId], references: [id])
@@ -70,6 +70,8 @@ model Item {
   transactions    InventoryTransaction[]
   createdAt       DateTime               @default(now())
   updatedAt       DateTime               @updatedAt
+
+  @@unique([slug, bakeryId])
 }
 
 model InventoryTransaction {

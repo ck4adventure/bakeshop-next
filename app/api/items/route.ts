@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   // Ensure slug uniqueness by appending a suffix if needed
   let slug = baseSlug
   let suffix = 1
-  while (await prisma.item.findUnique({ where: { slug } })) {
+  while (await prisma.item.findUnique({ where: { slug_bakeryId: { slug, bakeryId: session.user.bakeryId! } } })) {
     slug = `${baseSlug}-${suffix++}`
   }
 

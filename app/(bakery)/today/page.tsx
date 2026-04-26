@@ -24,7 +24,7 @@ type ScheduleEntry = {
   itemId: number;
   weekday: string;
   quantity: number;
-  item: { name: string; slug: string };
+  item: { name: string; slug: string; category: Category | null };
   isOverridden?: boolean;
   specialOrderQty?: number;
 };
@@ -375,9 +375,12 @@ export default function TodayPage() {
 
         const invMap: Record<number, number> = {};
         const catMap: Record<number, Category | null> = {};
+        for (const entry of schedData) {
+          catMap[entry.itemId] = entry.item.category;
+        }
         for (const rec of invData) {
           invMap[rec.itemId] = rec.quantity;
-          catMap[rec.itemId] = rec.item.category;
+          if (rec.item.category) catMap[rec.itemId] = rec.item.category;
         }
         setItemCategoryMap(catMap);
 
