@@ -21,7 +21,7 @@ export default function Header () {
       <header className="fixed top-0 left-0 right-0 h-14 bg-card border-b border-border z-40 flex items-center px-4 gap-3">
         <Link href="/" className="flex items-center gap-2 flex-1">
           <Image src="/cookies_clear.png" alt="Bakeshop logo" className="h-6 w-6" width={100} height={60}/>
-          <span className="text-base font-semibold tracking-tight text-muted-foreground">The Daily Bake</span>
+          <span className="hidden sm:inline text-base font-semibold tracking-tight text-muted-foreground">The Daily Bake</span>
         </Link>
 
         {session?.user?.bakeryName && (
