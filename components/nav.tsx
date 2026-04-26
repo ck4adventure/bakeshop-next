@@ -4,15 +4,15 @@ import NavLinks from "@/components/nav-links";
 import BottomNav from "@/components/bottom-nav";
 
 const TABS = [
-	{ label: "Today", icon: "☀️", href: "/shopid/today" },
-	{ label: "Schedule", icon: "📅", href: "/shopid/schedule" },
-	{ label: "Inventory", icon: "📦", href: "/shopid/inventory" },
-	{ label: "History", icon: "🥐", href: "/shopid/history" },
+	{ label: "Today", icon: "☀️", href: "/today" },
+	{ label: "Schedule", icon: "📅", href: "/schedule" },
+	{ label: "Inventory", icon: "📦", href: "/inventory" },
+	{ label: "History", icon: "🥐", href: "/history" },
 ] as const;
 
 const ADMIN_TABS = [
-	{ label: "Manage Items", icon: "🗂️", href: "/shopid/manage-items" },
-	{ label: "Settings", icon: "⚙️", href: "/shopid/settings" },
+	{ label: "Manage Items", icon: "🗂️", href: "/manage-items" },
+	{ label: "Settings", icon: "⚙️", href: "/settings" },
 ] as const;
 
 export default async function Nav() {

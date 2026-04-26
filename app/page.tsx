@@ -6,7 +6,7 @@ import Image from "next/image"
 
 export default async function Home() {
 	const session = await getServerSession(authOptions)
-	if (session) redirect("/shopid")
+	if (session) redirect("/today")
 
 	return (
 		<div className="flex flex-col min-h-screen bg-background">

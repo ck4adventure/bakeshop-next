@@ -5,8 +5,8 @@ const prisma = new PrismaClient()
 const SALT_ROUNDS = 10
 
 const demo_bakery = {
-	name: "Demo Bakery",
-	slug: "demo-bakery",
+	name: "Demo Bakeshop",
+	slug: "demo-bakeshop",
 	operatingDays: [
 		Weekday.Sunday,
 		Weekday.Monday,
@@ -27,21 +27,21 @@ const users_demo_data = [
 const categories_demo_data = [
 	{ name: "Cookies" },
 	{ name: "Bars" },
-	{name: "Sweet Pastry"},
-	{name: "Savory Pastry"},
+	{name: "Pastries"},
+	// {name: "Savory Pastry"},
 ];
 
 // categoryName is used to look up the seeded category id after upsert
 const items_demo_data = [
-	{ name: "Sticky Bun", slug: "sticky-bun", categoryName: "Sweet Pastry" },
-	{ name: "Ginger Scone", slug: "ginger-scone", categoryName: "Sweet Pastry" },
-	{ name: "Berry Muffin", slug: "berry-muffin", categoryName: "Sweet Pastry" },
-	// { name: "Cardamom Donut Muffin", slug: "cardamom-donut-muffin", categoryName: "Sweet Pastry" },
-	// { name: "Apple Turnover", slug: "apple-turnover", categoryName: "Sweet Pastry" },
-	// { name: "Berry Danish", slug: "berry-danish", categoryName: "Sweet Pastry" },
-	{ name: "Ham Turnover", slug: "ham-turnover", categoryName: "Savory Pastry" },
-	{ name: "Cheddar Scallion Scone", slug: "cheddar-scallion-scone", categoryName: "Savory Pastry" },
-	{ name: "Spanakopita Galette", slug: "spanakopita-galette", categoryName: "Savory Pastry" },
+	{ name: "Sticky Bun", slug: "sticky-bun", categoryName: "Pastries" },
+	{ name: "Ginger Scone", slug: "ginger-scone", categoryName: "Pastries" },
+	{ name: "Berry Muffin", slug: "berry-muffin", categoryName: "Pastries" },
+	// { name: "Cardamom Donut Muffin", slug: "cardamom-donut-muffin", categoryName: "Pastries" },
+	// { name: "Apple Turnover", slug: "apple-turnover", categoryName: "Pastries" },
+	// { name: "Berry Danish", slug: "berry-danish", categoryName: "Pastries" },
+	// { name: "Ham Turnover", slug: "ham-turnover", categoryName: "Savory Pastry" },
+	// { name: "Cheddar Scallion Scone", slug: "cheddar-scallion-scone", categoryName: "Savory Pastry" },
+	// { name: "Spanakopita Galette", slug: "spanakopita-galette", categoryName: "Savory Pastry" },
 	// { name: "Herbed Gougere", slug: "herbed-gougere", categoryName: "Savory Pastry" },
 	// { name: "Ham Quiche", slug: "ham-quiche", categoryName: "Savory Pastry" },
 	// { name: "Roasted Vegetable Quiche", slug: "roasted-vegetable-quiche", categoryName: "Savory Pastry" },
@@ -86,7 +86,7 @@ async function main() {
 	// seed users, linked to demo bakery
 	for (const u of users_demo_data) {
 		const passwordHash = await bcrypt.hash(u.password, SALT_ROUNDS)
-		const email = `${u.username}@bakeshop.dev`
+		const email = `${u.username}@thedailybake.dev`
 		await prisma.user.upsert({
 			where: { username: u.username },
 			update: { email, passwordHash, bakeryId: bakery.id },
@@ -138,16 +138,16 @@ async function main() {
 		// })
 		const schedResult = await prisma.productionSchedule.createMany({ skipDuplicates: true,
 			data: [
-				{
-					itemId: itemResult.id,
-					quantity: 0,
-					weekday: Weekday.Monday
-				},
-				{
-					itemId: itemResult.id,
-					quantity: 0,
-					weekday: Weekday.Tuesday
-				},
+				// {
+				// 	itemId: itemResult.id,
+				// 	quantity: 0,
+				// 	weekday: Weekday.Monday
+				// },
+				// {
+				// 	itemId: itemResult.id,
+				// 	quantity: 0,
+				// 	weekday: Weekday.Tuesday
+				// },
 				{
 					itemId: itemResult.id,
 					quantity: 10,

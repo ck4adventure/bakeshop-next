@@ -46,7 +46,7 @@ export default function SettingsPage() {
             <p className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               Setup
             </p>
-            <NavRow label="Operating Days" href="/shopid/operating-days" />
+            <NavRow label="Operating Days" href="/operating-days" />
           </section>
         </main>
       )}
