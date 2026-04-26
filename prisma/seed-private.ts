@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
 import { PrismaClient, Role, Weekday } from '../app/generated/prisma/client'
 import * as bcrypt from 'bcrypt'
 

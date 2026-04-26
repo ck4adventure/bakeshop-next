@@ -19,9 +19,9 @@ const demo_bakery = {
 }
 
 const users_demo_data = [
-	{ username: process.env.USER3_USERNAME ?? 'admin', password: process.env.USER3_PASSWORD ?? 'admin123', role: Role.ADMIN },
-	{ username: process.env.USER2_USERNAME ?? 'manager', password: process.env.USER2_PASSWORD ?? 'manager123', role: Role.MANAGER },
-	{ username: process.env.USER1_USERNAME ?? 'baker', password: process.env.USER1_PASSWORD ?? 'baker123', role: Role.BAKER },
+	{ username: 'admin', password: 'admin123', role: Role.ADMIN },
+	{ username: 'manager', password: 'manager123', role: Role.MANAGER },
+	{ username: 'baker', password: 'baker123', role: Role.BAKER },
 ]
 
 const categories_demo_data = [
@@ -127,8 +127,8 @@ async function main() {
 		});
 		console.log(`batch seeded for: ${itemResult.slug} (qty: ${qty})`);
 
-		// give item a production schedule
-		// itemId, weekday 0-6, quantity
+		//give item a production schedule
+		//itemId, weekday 0-6, quantity
 		// const schedResult = await prisma.productionSchedule.create({
 		// 	data: {
 		// 		itemId: itemResult.id,
