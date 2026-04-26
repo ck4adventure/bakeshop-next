@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     await prisma.$transaction([
       prisma.itemInventory.create({ data: { itemId: item.id, quantity: initialQty } }),
       prisma.inventoryTransaction.create({
-        data: { itemId: item.id, delta: initialQty, reason: 'ADJUSTMENT' },
+        data: { itemId: item.id, delta: initialQty, reason: 'INITIAL' },
       }),
     ])
   }

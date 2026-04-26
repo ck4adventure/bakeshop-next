@@ -96,6 +96,7 @@ enum InventoryReason {
   BATCH // to add
   BAKE // daily bake off
   ADJUSTMENT // something fell on floor or burnt
+  INITIAL // set when item is first created
   // Add more as needed
 }
 
