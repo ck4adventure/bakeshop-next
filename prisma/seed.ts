@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { InventoryReason, PrismaClient, Role, Weekday } from '../app/generated/prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import * as bcrypt from 'bcrypt'
