@@ -61,7 +61,7 @@ export default function OperatingDaysPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 bg-card border-b border-border px-4 pt-5 pb-3 flex items-center gap-3">
         <Link
-          href="/shopid/settings"
+          href="/settings"
           aria-label="Go back"
           className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-lg"
         >

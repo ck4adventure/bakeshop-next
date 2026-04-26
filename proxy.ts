@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
 
-const protectedRoutes = ["/shopid"]
+const protectedRoutes = ["/today", "/schedule", "/inventory", "/history", "/manage-items", "/settings", "/operating-days"]
 const authRoutes = ["/login"]
 
 export default async function proxy(req: NextRequest) {
@@ -15,7 +15,7 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url))
   }
   if (isAuthRoute && token) {
-    return NextResponse.redirect(new URL("/shopid", req.url))
+    return NextResponse.redirect(new URL("/today", req.url))
   }
 
   return NextResponse.next()

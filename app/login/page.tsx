@@ -34,11 +34,60 @@ export default function LoginPage() {
 		}
 	};
 
+	const handleDemoLogin = async (demoUsername: string, demoPassword: string) => {
+		setError(null);
+		setLoading(true);
+		const result = await signIn("credentials", {
+			username: demoUsername,
+			password: demoPassword,
+			redirect: false,
+		});
+		setLoading(false);
+		if (result?.error) {
+			setError("Demo login failed");
+		} else {
+			router.push("/");
+		}
+	};
+
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-50">
+			<div className="w-full max-w-sm space-y-4">
+			<div className="rounded-lg bg-white p-6 shadow-md text-gray-900">
+				<h2 className="mb-4 text-center text-lg font-semibold">Demo Logins</h2>
+				<div className="flex flex-col gap-2">
+					<Button
+						type="button"
+						variant="outline"
+						className="flex-1"
+						disabled={loading}
+						onClick={() => handleDemoLogin("admin", "admin123")}
+					>
+						Admin
+					</Button>
+					<Button
+						type="button"
+						variant="outline"
+						className="flex-1"
+						disabled={loading}
+						onClick={() => handleDemoLogin("manager", "manager123")}
+					>
+						Manager
+					</Button>
+					<Button
+						type="button"
+						variant="outline"
+						className="flex-1"
+						disabled={loading}
+						onClick={() => handleDemoLogin("baker", "baker123")}
+					>
+						Baker
+					</Button>
+				</div>
+			</div>
 			<form
 				onSubmit={handleSubmit}
-				className="w-full max-w-sm rounded-lg bg-white p-8 shadow-md text-gray-900"
+				className="w-full rounded-lg bg-white p-8 shadow-md text-gray-900"
 			>
 				<h2 className="mb-6 text-center text-2xl font-bold">Login</h2>
 				{error && (
@@ -74,6 +123,7 @@ export default function LoginPage() {
 					{loading ? "Signing in..." : "Sign In"}
 				</Button>
 			</form>
+			</div>
 		</div>
 	);
 }
