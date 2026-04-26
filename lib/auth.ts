@@ -8,7 +8,7 @@ const DUMMY_HASH = "$2b$10$dummyhashusedtopreventserioususerenumerationtiming000
 async function validateUser(username: string, password: string) {
     const user = await prisma.user.findUnique({
       where: { username },
-      include: { bakery: { select: { id: true, slug: true } } },
+      include: { bakery: { select: { id: true, slug: true, name: true } } },
     });
     const hashToCompare = user?.passwordHash ?? DUMMY_HASH;
     const valid = await bcrypt.compare(password, hashToCompare);
@@ -39,9 +39,10 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+token.id = user.id
         token.role = (user as any).role
         token.bakeryId = (user as any).bakery?.id ?? null
+        token.bakeryName = (user as any).bakery?.name ?? null
       }
       return token
     },
@@ -50,6 +51,7 @@ export const authOptions: AuthOptions = {
         session.user.id = token.id
         session.user.role = token.role
         session.user.bakeryId = token.bakeryId
+        session.user.bakeryName = token.bakeryName
       }
       return session
     },

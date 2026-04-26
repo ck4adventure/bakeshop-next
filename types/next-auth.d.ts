@@ -2,11 +2,11 @@ import { DefaultSession } from "next-auth"
 
 declare module "next-auth" {
   interface Session {
-    user: { id: string; role: string; bakeryId: string | null } & DefaultSession["user"]
+    user: { id: string; role: string; bakeryId: string | null; bakeryName: string | null } & DefaultSession["user"]
   }
   interface User {
     role: string
-    bakery?: { id: string; slug: string } | null
+    bakery?: { id: string; slug: string; name: string } | null
   }
 }
 
@@ -15,5 +15,6 @@ declare module "next-auth/jwt" {
     id: string
     role: string
     bakeryId: string | null
+    bakeryName: string | null
   }
 }
