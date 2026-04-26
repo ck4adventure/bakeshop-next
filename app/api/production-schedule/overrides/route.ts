@@ -39,6 +39,11 @@ export async function POST(req: Request) {
     return Response.json({ message: 'Overrides cannot be set for today or past dates' }, { status: 400 })
   }
 
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, bakeryId: session.user.bakeryId },
+  })
+  if (!item) return Response.json({ message: 'Item not found' }, { status: 404 })
+
   const override = await prisma.dailyQuotaOverride.upsert({
     where: { itemId_date: { itemId, date: new Date(date) } },
     create: { itemId, bakeryId: session.user.bakeryId, date: new Date(date), quantity, specialOrderQty },
