@@ -1,20 +1,23 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { mutate } from 'swr';
 import { Plus, Calendar } from 'lucide-react';
 import { ItemSheet, SheetState } from '@/components/item-sheet';
 import { useToast } from '@/lib/use-toast';
 import Toast from '@/components/toast';
+import { useItems, useCategories, useProductionSchedule, useBakerySettings } from '@/lib/swr-hooks';
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ItemsPage() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [scheduleEntries, setScheduleEntries] = useState<ScheduleEntry[]>([]);
-  const [operatingDays, setOperatingDays] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const { data: items = [], error: itemsError, isLoading: loading } = useItems();
+  const { data: categories = [] } = useCategories();
+  const { data: scheduleEntries = [] } = useProductionSchedule();
+  const { data: settings } = useBakerySettings();
+  const operatingDays = settings?.operatingDays ?? [];
+  const fetchError = itemsError ? 'Failed to load items' : null;
+
   const [sheet, setSheet] = useState<SheetState | null>(null);
   const { toast, showToast } = useToast();
   const [activeFilter, setActiveFilter] = useState<number | null>(null);
@@ -24,61 +27,24 @@ export default function ItemsPage() {
     [scheduleEntries],
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [itemsRes, catsRes, schedRes, settingsRes] = await Promise.all([
-          fetch(`/api/items`, { credentials: 'include' }),
-          fetch(`/api/categories`, { credentials: 'include' }),
-          fetch(`/api/production-schedule`, { credentials: 'include' }),
-          fetch(`/api/bakery/settings`, { credentials: 'include' }),
-        ]);
-        if (!itemsRes.ok) throw new Error('Failed to load items');
-        const [itemsData, catsData, schedData, settingsData] = await Promise.all([
-          itemsRes.json(),
-          catsRes.ok ? catsRes.json() : [],
-          schedRes.ok ? schedRes.json() : [],
-          settingsRes.ok ? settingsRes.json() : { operatingDays: [] },
-        ]);
-        setItems(itemsData);
-        setCategories(catsData);
-        setScheduleEntries(schedData);
-        setOperatingDays(settingsData.operatingDays ?? []);
-      } catch (err) {
-        setFetchError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const handleSaved = (saved: Item, savedSchedule: Record<string, number>) => {
+  const handleSaved = (saved: Item, _savedSchedule: Record<string, number>) => {
     const isNew = !items.some(i => i.id === saved.id);
-    setItems(prev => {
-      const idx = prev.findIndex(i => i.id === saved.id);
-      return idx >= 0
-        ? prev.map(i => i.id === saved.id ? saved : i)
-        : [...prev, saved];
-    });
-    setScheduleEntries(prev => [
-      ...prev.filter(e => e.itemId !== saved.id),
-      ...Object.entries(savedSchedule).map(([weekday, quantity]) => ({ itemId: saved.id, weekday, quantity })),
-    ]);
     showToast(isNew ? `${saved.name} added` : `${saved.name} updated`);
     setSheet(null);
+    mutate('/api/items');
+    mutate('/api/production-schedule');
   };
 
   const handleDeleted = (id: number) => {
     const item = items.find(i => i.id === id);
-    setItems(prev => prev.filter(i => i.id !== id));
-    setScheduleEntries(prev => prev.filter(e => e.itemId !== id));
     showToast(`${item?.name ?? 'Item'} deleted`);
     setSheet(null);
+    mutate('/api/items');
+    mutate('/api/production-schedule');
   };
 
-  const handleCategoryCreated = (cat: Category) => {
-    setCategories(prev => [...prev, cat].sort((a, b) => a.name.localeCompare(b.name)));
+  const handleCategoryCreated = (_cat: Category) => {
+    mutate('/api/categories');
   };
 
   const categoriesWithItems = categories.filter(cat => items.some(i => i.category?.id === cat.id));

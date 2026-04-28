@@ -1,9 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { mutate } from 'swr';
 import ModalShell from '@/components/modal-shell';
 import { WEEKDAYS } from '@/lib/weekdays';
 import { useToast } from '@/lib/use-toast';
 import Toast from '@/components/toast';
+import { useInventory, useProductionSchedule, useCategories, useTodayBakes, useScheduleOverrides } from '@/lib/swr-hooks';
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -17,11 +19,6 @@ type InventoryRecord = {
   item: { name: string; slug: string; par: number | null; category: Category | null };
 };
 
-type BakeTransaction = {
-  id: number;
-  itemId: number;
-  quantity: number; // stored as negative
-};
 
 type ScheduleEntry = {
   itemId: number;
@@ -331,101 +328,80 @@ const COMPLETION_FILTERS: { val: CompletionFilter; label: string }[] = [
 ];
 
 export default function TodayPage() {
+  const todayDateStr = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const { data: invData, error: invError, isLoading: loading } = useInventory();
+  const { data: schedData } = useProductionSchedule();
+  const { data: catsData = [] } = useCategories();
+  const { data: todayBakesData = [] } = useTodayBakes();
+  const { data: overridesData = [] } = useScheduleOverrides(todayDateStr);
+  const fetchError = invError ? 'Failed to load inventory' : null;
 
   const [bakeList, setBakeList] = useState<{ entry: ScheduleEntry; stock: number }[]>([]);
   const [attentionItems, setAttentionItems] = useState<InventoryRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  // itemId → category (built from inventory response)
   const [itemCategoryMap, setItemCategoryMap] = useState<Record<number, Category | null>>({});
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [bakedToday, setBakedToday] = useState<Record<number, { qty: number; transactionId: number }>>({});
+  const [seeded, setSeeded] = useState(false);
+
+  useEffect(() => {
+    if (seeded || !invData || !schedData) return;
+    setSeeded(true);
+
+    const today = getTodayWeekday();
+    // schedData from the API includes item.name/category even though the global type omits it
+    const richSched = schedData as unknown as ScheduleEntry[];
+    const todayEntries = richSched.filter(e => e.weekday === today);
+
+    const overrideQtyMap: Record<number, { quantity: number; specialOrderQty: number }> = {};
+    for (const o of overridesData) {
+      overrideQtyMap[o.itemId] = { quantity: o.quantity, specialOrderQty: o.specialOrderQty ?? 0 };
+    }
+    for (const entry of todayEntries) {
+      const ov = overrideQtyMap[entry.itemId];
+      if (ov !== undefined) {
+        entry.quantity = ov.quantity + ov.specialOrderQty;
+        entry.isOverridden = true;
+        entry.specialOrderQty = ov.specialOrderQty;
+      }
+    }
+
+    const invMap: Record<number, number> = {};
+    const catMap: Record<number, Category | null> = {};
+    for (const entry of richSched) catMap[entry.itemId] = entry.item.category;
+    for (const rec of invData as unknown as InventoryRecord[]) {
+      invMap[rec.itemId] = rec.quantity;
+      if (rec.item.category) catMap[rec.itemId] = rec.item.category;
+    }
+    setItemCategoryMap(catMap);
+    setCategories(catsData as unknown as Category[]);
+
+    const bakes = todayEntries.map(entry => ({ entry, stock: invMap[entry.itemId] ?? 0 }));
+
+    const initialBakedToday: Record<number, { qty: number; transactionId: number }> = {};
+    for (const t of todayBakesData) {
+      initialBakedToday[t.itemId] = { qty: Math.abs(t.quantity), transactionId: t.id };
+    }
+    setBakedToday(initialBakedToday);
+
+    sortBakeList(bakes, initialBakedToday);
+    setBakeList(bakes);
+
+    const scheduledIds = new Set(todayEntries.map(e => e.itemId));
+    setAttentionItems(
+      (invData as unknown as InventoryRecord[]).filter(rec => !scheduledIds.has(rec.itemId) && rec.quantity === 0)
+    );
+  }, [seeded, invData, schedData, catsData, todayBakesData, overridesData]);
 
   // itemId → { qty, transactionId } for confirmed bakes this session
-  const [bakedToday, setBakedToday] = useState<Record<number, { qty: number; transactionId: number }>>({});
   const [selectedBake, setSelectedBake] = useState<{ entry: ScheduleEntry; stock: number } | null>(null);
   const [saving, setSaving] = useState(false);
   const [completionFilter, setCompletionFilter] = useState<CompletionFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const { toast, showToast } = useToast();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const now = new Date();
-        const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        const [invRes, schedRes, catsRes, todayBakesRes, overridesRes] = await Promise.all([
-          fetch(`/api/inventory`, { credentials: 'include' }),
-          fetch(`/api/production-schedule`, { credentials: 'include' }),
-          fetch(`/api/categories`, { credentials: 'include' }),
-          fetch(`/api/inventory/bakes/today`, { credentials: 'include' }),
-          fetch(`/api/production-schedule/overrides?date=${todayDateStr}`, { credentials: 'include' }),
-        ]);
-        if (!invRes.ok) throw new Error('Failed to load inventory');
-        if (!schedRes.ok) throw new Error('Failed to load schedule');
-
-        const [invData, schedData, overridesData, todayBakesData]: [InventoryRecord[], ScheduleEntry[], { itemId: number; quantity: number; specialOrderQty?: number }[], BakeTransaction[]] = await Promise.all([
-          invRes.json(),
-          schedRes.json(),
-          overridesRes.ok ? overridesRes.json() : Promise.resolve([]),
-          todayBakesRes.ok ? todayBakesRes.json() : Promise.resolve([]),
-        ]);
-
-        setCategories(catsRes.ok ? await catsRes.json() : []);
-
-        const today = getTodayWeekday();
-        const todayEntries = schedData.filter(e => e.weekday === today);
-
-        // Apply any overrides on top of the weekly template
-        const overrideQtyMap: Record<number, { quantity: number; specialOrderQty: number }> = {};
-        for (const o of overridesData) {
-          overrideQtyMap[o.itemId] = { quantity: o.quantity, specialOrderQty: o.specialOrderQty ?? 0 };
-        }
-        for (const entry of todayEntries) {
-          const ov = overrideQtyMap[entry.itemId];
-          if (ov !== undefined) {
-            entry.quantity = ov.quantity + ov.specialOrderQty;
-            entry.isOverridden = true;
-            entry.specialOrderQty = ov.specialOrderQty;
-          }
-        }
-
-        const invMap: Record<number, number> = {};
-        const catMap: Record<number, Category | null> = {};
-        for (const entry of schedData) {
-          catMap[entry.itemId] = entry.item.category;
-        }
-        for (const rec of invData) {
-          invMap[rec.itemId] = rec.quantity;
-          if (rec.item.category) catMap[rec.itemId] = rec.item.category;
-        }
-        setItemCategoryMap(catMap);
-
-        const bakes = todayEntries.map(entry => ({
-          entry,
-          stock: invMap[entry.itemId] ?? 0,
-        }));
-
-        const initialBakedToday: Record<number, { qty: number; transactionId: number }> = {};
-        for (const t of todayBakesData) {
-          initialBakedToday[t.itemId] = { qty: Math.abs(t.quantity), transactionId: t.id };
-        }
-        setBakedToday(initialBakedToday);
-
-        sortBakeList(bakes, initialBakedToday);
-        setBakeList(bakes);
-
-        const scheduledIds = new Set(todayEntries.map(e => e.itemId));
-        setAttentionItems(
-          invData.filter(rec => !scheduledIds.has(rec.itemId) && rec.quantity === 0)
-        );
-      } catch (err) {
-        setFetchError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   const handleConfirmBake = async (quantity: number, note: string) => {
     if (!selectedBake) return;
@@ -458,6 +434,8 @@ export default function TodayPage() {
       sortBakeList(updatedList, newBakedToday);
       setBakeList(updatedList);
 
+      mutate('/api/inventory');
+      mutate('/api/inventory/bakes/today');
       setSelectedBake(null);
       showToast(`${selectedBake.entry.item.name} — ${quantity} baked`);
     } catch (err) {
@@ -488,6 +466,8 @@ export default function TodayPage() {
       sortBakeList(updatedList, newBakedToday);
       setBakeList(updatedList);
 
+      mutate('/api/inventory');
+      mutate('/api/inventory/bakes/today');
       showToast('Bake undone');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Something went wrong');

@@ -1,9 +1,11 @@
 'use client'
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { mutate } from 'swr';
 import ModalShell from '@/components/modal-shell';
 import { WEEKDAYS, WEEKDAY_SHORT, type Weekday } from '@/lib/weekdays';
 import { useToast } from '@/lib/use-toast';
 import Toast from '@/components/toast';
+import { useItems, useProductionSchedule, useBakerySettings } from '@/lib/swr-hooks';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -312,12 +314,25 @@ function DailySheet({
 type Mode = 'summary' | 'weekly';
 
 export default function SchedulePage() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [scheduleMap, setScheduleMap] = useState<ScheduleMap>({});
-  const [operatingDays, setOperatingDays] = useState<Weekday[]>([...WEEKDAYS]);
-  const [weekStart, setWeekStart] = useState<Weekday>('Sunday');
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const { data: items = [], error: itemsError, isLoading: loading } = useItems();
+  const { data: scheduleEntries = [], error: schedError } = useProductionSchedule();
+  const { data: settings } = useBakerySettings();
+  const fetchError = (itemsError || schedError) ? 'Failed to load schedule' : null;
+
+  const operatingDays = useMemo(
+    () => (settings?.operatingDays?.length ? settings.operatingDays as Weekday[] : [...WEEKDAYS]),
+    [settings],
+  );
+  const weekStart: Weekday = (settings?.operatingDays?.[0] as Weekday) ?? 'Sunday';
+
+  const scheduleMap = useMemo<ScheduleMap>(() => {
+    const map: ScheduleMap = {};
+    for (const entry of scheduleEntries) {
+      if (!map[entry.weekday]) map[entry.weekday] = {};
+      map[entry.weekday][entry.itemId] = entry.quantity;
+    }
+    return map;
+  }, [scheduleEntries]);
 
   // Summary mode state
   const [mode, setMode] = useState<Mode>('summary');
@@ -384,70 +399,35 @@ export default function SchedulePage() {
     }
   }, []);
 
+  const [overridesFetched, setOverridesFetched] = useState(false);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [itemsRes, schedRes, settingsRes] = await Promise.all([
-          fetch(`/api/items`, { credentials: 'include' }),
-          fetch(`/api/production-schedule`, { credentials: 'include' }),
-          fetch(`/api/bakery/settings`, { credentials: 'include' }),
-        ]);
-        if (!itemsRes.ok) throw new Error('Failed to load items');
-        if (!schedRes.ok) throw new Error('Failed to load schedule');
-
-        const [itemsData, schedData, settingsData]: [Item[], ScheduleEntry[], { operatingDays: Weekday[] }] = await Promise.all([
-          itemsRes.json(),
-          schedRes.json(),
-          settingsRes.ok ? settingsRes.json() : Promise.resolve({ operatingDays: [] }),
-        ]);
-
-        setItems(itemsData);
-
-        const map: ScheduleMap = {};
-        for (const entry of schedData) {
-          if (!map[entry.weekday]) map[entry.weekday] = {};
-          map[entry.weekday][entry.itemId] = entry.quantity;
-        }
-        setScheduleMap(map);
-
-        let upcomingOpDates = upcomingDates;
-        if (settingsData.operatingDays.length > 0) {
-          setOperatingDays(settingsData.operatingDays);
-          setWeekStart(settingsData.operatingDays[0]);
-          const todayName = WEEKDAYS[getTodayIdx()];
-          if (!settingsData.operatingDays.includes(todayName)) {
-            const firstOpIdx = WEEKDAYS.indexOf(settingsData.operatingDays[0]);
-            if (firstOpIdx >= 0) setSelectedDayIdx(firstOpIdx);
-          }
-          upcomingOpDates = upcomingDates.filter(d => settingsData.operatingDays.includes(WEEKDAYS[d.weekdayIdx]));
-        }
-
-        // Batch-fetch overrides for all upcoming operating days
-        fetchAllUpcomingOverrides(upcomingOpDates.map(d => d.dateStr));
-      } catch (err) {
-        setFetchError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
+    if (!settings || overridesFetched) return;
+    setOverridesFetched(true);
+    const opDays = (settings.operatingDays ?? []) as Weekday[];
+    if (opDays.length > 0) {
+      const todayName = WEEKDAYS[getTodayIdx()];
+      if (!opDays.includes(todayName)) {
+        const firstOpIdx = WEEKDAYS.indexOf(opDays[0]);
+        if (firstOpIdx >= 0) setSelectedDayIdx(firstOpIdx);
       }
-    };
-    fetchData();
-  }, [fetchAllUpcomingOverrides]);
+    }
+    const opDates = opDays.length > 0
+      ? upcomingDates.filter(d => opDays.includes(WEEKDAYS[d.weekdayIdx]))
+      : upcomingDates;
+    fetchAllUpcomingOverrides(opDates.map(d => d.dateStr));
+  }, [settings, overridesFetched, fetchAllUpcomingOverrides]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  const handleWeeklySaved = (itemId: number, weekday: Weekday, quantity: number) => {
-    setScheduleMap(prev => ({ ...prev, [weekday]: { ...(prev[weekday] ?? {}), [itemId]: quantity } }));
+  const handleWeeklySaved = (_itemId: number, _weekday: Weekday, _quantity: number) => {
+    mutate('/api/production-schedule');
     setWeeklySheet(null);
     setMode('summary');
     showToast('Schedule updated');
   };
 
-  const handleWeeklyRemoved = (itemId: number, weekday: Weekday) => {
-    setScheduleMap(prev => {
-      const day = { ...(prev[weekday] ?? {}) };
-      delete day[itemId];
-      return { ...prev, [weekday]: day };
-    });
+  const handleWeeklyRemoved = (_itemId: number, _weekday: Weekday) => {
+    mutate('/api/production-schedule');
     setWeeklySheet(null);
     setMode('summary');
     showToast('Removed from schedule');
