@@ -6,6 +6,7 @@ import { ItemSheet, SheetState } from '@/components/item-sheet';
 import { useToast } from '@/lib/use-toast';
 import Toast from '@/components/toast';
 
+// ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);

@@ -6,6 +6,8 @@ import { WEEKDAYS, type Weekday } from '@/lib/weekdays';
 import { useToast } from '@/lib/use-toast';
 import Toast from '@/components/toast';
 
+// ─── Page ──────────────────────────────────────────────────────────────────────
+
 export default function OperatingDaysPage() {
   // const navigate = useNavigate();
   const [selected, setSelected] = useState<Set<Weekday>>(new Set());
