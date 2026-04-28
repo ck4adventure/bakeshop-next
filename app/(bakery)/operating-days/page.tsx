@@ -9,7 +9,6 @@ import Toast from '@/components/toast';
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function OperatingDaysPage() {
-  // const navigate = useNavigate();
   const [selected, setSelected] = useState<Set<Weekday>>(new Set());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
