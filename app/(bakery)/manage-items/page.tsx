@@ -111,45 +111,43 @@ export default function ItemsPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-card border-b border-border px-4 pt-5 pb-3 flex items-center gap-3">
-        <div>
-          <h1 className="text-[22px] font-bold text-foreground leading-none">Items</h1>
-          {!loading && !fetchError && (
-            <p className="text-[13px] text-muted-foreground mt-0.5">
-              {items.length} item{items.length !== 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
-      </header>
+      <header className="sticky top-0 z-10 bg-card border-b border-border px-4 pt-5 pb-3">
+        <h1 className="text-[22px] font-bold text-foreground leading-none">Items</h1>
+        {!loading && !fetchError && (
+          <p className="text-[13px] text-muted-foreground mt-0.5">
+            {items.length} item{items.length !== 1 ? 's' : ''}
+          </p>
+        )}
 
-      {/* Filter chips */}
-      {showChips && (
-        <div className="px-4 pt-3 pb-1 flex gap-2 overflow-x-auto scrollbar-none">
-          <button
-            onClick={() => setActiveFilter(null)}
-            className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm border transition-colors cursor-pointer ${
-              activeFilter === null
-                ? 'bg-sienna text-white border-sienna font-semibold antialiased'
-                : 'bg-transparent text-foreground border-border hover:bg-muted font-medium'
-            }`}
-          >
-            All
-          </button>
-          {categoriesWithItems.map(cat => (
+        {/* Filter chips */}
+        {showChips && (
+          <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-none">
             <button
-              key={cat.id}
-              onClick={() => setActiveFilter(cat.id)}
+              onClick={() => setActiveFilter(null)}
               className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm border transition-colors cursor-pointer ${
-                activeFilter === cat.id
+                activeFilter === null
                   ? 'bg-sienna text-white border-sienna font-semibold antialiased'
                   : 'bg-transparent text-foreground border-border hover:bg-muted font-medium'
               }`}
             >
-              {cat.name}
+              All
             </button>
-          ))}
-        </div>
-      )}
+            {categoriesWithItems.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveFilter(cat.id)}
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm border transition-colors cursor-pointer ${
+                  activeFilter === cat.id
+                    ? 'bg-sienna text-white border-sienna font-semibold antialiased'
+                    : 'bg-transparent text-foreground border-border hover:bg-muted font-medium'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </header>
 
       {/* List */}
       <main className="px-4 pt-3 pb-28 flex flex-col gap-2">
