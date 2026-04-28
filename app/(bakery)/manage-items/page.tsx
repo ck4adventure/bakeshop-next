@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Calendar } from 'lucide-react';
 import { ItemSheet, SheetState } from '@/components/item-sheet';
 import { useToast } from '@/lib/use-toast';
@@ -19,8 +19,9 @@ export default function ItemsPage() {
   const { toast, showToast } = useToast();
   const [activeFilter, setActiveFilter] = useState<number | null>(null);
 
-  const scheduledItemIds = new Set(
-    scheduleEntries.filter(e => e.quantity > 0).map(e => e.itemId)
+  const scheduledItemIds = useMemo(
+    () => new Set(scheduleEntries.filter(e => e.quantity > 0).map(e => e.itemId)),
+    [scheduleEntries],
   );
 
   useEffect(() => {

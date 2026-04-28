@@ -69,7 +69,6 @@ function formatRunoutLabel(runoutDate: Date | null): string | null {
 
 type Status = 'good' | 'low' | 'critical' | 'zero';
 
-
 function getTomorrowWeekday(): string {
   return WEEKDAYS[(new Date().getDay() + 1) % 7];
 }

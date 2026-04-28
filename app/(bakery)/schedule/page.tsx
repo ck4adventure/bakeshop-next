@@ -431,8 +431,7 @@ export default function SchedulePage() {
       }
     };
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchAllUpcomingOverrides]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 

@@ -70,6 +70,21 @@ const READINESS_COLOR: Record<BakeReadiness, string> = {
 
 const DONE_COLOR = 'var(--status-above-par-text)';
 
+function sortBakeList(
+  list: { entry: ScheduleEntry; stock: number }[],
+  baked: Record<number, unknown>,
+) {
+  list.sort((a, b) => {
+    const aBaked = a.entry.itemId in baked;
+    const bBaked = b.entry.itemId in baked;
+    if (aBaked !== bBaked) return aBaked ? 1 : -1;
+    return (
+      READINESS_ORDER[getReadiness(a.stock, a.entry.quantity)] -
+      READINESS_ORDER[getReadiness(b.stock, b.entry.quantity)]
+    );
+  });
+}
+
 function BakeCard({
   entry,
   stock,
@@ -411,22 +426,6 @@ export default function TodayPage() {
     };
     fetchData();
   }, []);
-
-  // Sort: unbaked empty → unbaked low → unbaked sufficient → baked
-  function sortBakeList(
-    list: { entry: ScheduleEntry; stock: number }[],
-    baked: Record<number, unknown>,
-  ) {
-    list.sort((a, b) => {
-      const aBaked = a.entry.itemId in baked;
-      const bBaked = b.entry.itemId in baked;
-      if (aBaked !== bBaked) return aBaked ? 1 : -1;
-      return (
-        READINESS_ORDER[getReadiness(a.stock, a.entry.quantity)] -
-        READINESS_ORDER[getReadiness(b.stock, b.entry.quantity)]
-      );
-    });
-  }
 
   const handleConfirmBake = async (quantity: number, note: string) => {
     if (!selectedBake) return;
