@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
-type Weekday = typeof WEEKDAYS[number];
+import { WEEKDAYS, type Weekday } from '@/lib/weekdays';
+import { useToast } from '@/lib/use-toast';
+import Toast from '@/components/toast';
 
 export default function OperatingDaysPage() {
   // const navigate = useNavigate();
@@ -13,7 +12,7 @@ export default function OperatingDaysPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     fetch(`/api/bakery/settings`, { credentials: 'include' })
@@ -47,11 +46,9 @@ export default function OperatingDaysPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error((data as { message?: string }).message ?? 'Save failed');
       }
-      setToast('Saved!');
-      setTimeout(() => setToast(null), 2800);
+      showToast('Saved!');
     } catch (err) {
-      setToast(err instanceof Error ? err.message : 'Something went wrong');
-      setTimeout(() => setToast(null), 2800);
+      showToast(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setSaving(false);
     }
@@ -115,13 +112,7 @@ export default function OperatingDaysPage() {
         )}
       </main>
 
-      {toast && (
-        <div role="status" aria-live="polite"
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-medium z-40 shadow-lg whitespace-nowrap"
-        >
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
     </div>
   );
 }

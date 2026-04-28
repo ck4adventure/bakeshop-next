@@ -1,6 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react';
 import ModalShell from '@/components/modal-shell';
+import { WEEKDAYS } from '@/lib/weekdays';
+import { useToast } from '@/lib/use-toast';
 
 
 type ScheduleLookup = Map<number, Map<string, number>>; // itemId → weekday → quota
@@ -67,7 +69,6 @@ function formatRunoutLabel(runoutDate: Date | null): string | null {
 
 type Status = 'good' | 'low' | 'critical' | 'zero';
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
 function getTomorrowWeekday(): string {
   return WEEKDAYS[(new Date().getDay() + 1) % 7];
@@ -378,7 +379,7 @@ export default function InventoryPage() {
 
   const [filter, setFilter] = useState<Filter>('all');
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -478,11 +479,6 @@ export default function InventoryPage() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2800);
   };
 
   const getItemStatus = (item: InventoryItem) =>

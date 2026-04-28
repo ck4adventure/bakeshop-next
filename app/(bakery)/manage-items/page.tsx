@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, Calendar } from 'lucide-react';
 import { ItemSheet, SheetState } from '@/components/item-sheet';
+import { useToast } from '@/lib/use-toast';
+import Toast from '@/components/toast';
 
 
 export default function ItemsPage() {
@@ -13,7 +15,7 @@ export default function ItemsPage() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [sheet, setSheet] = useState<SheetState | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
   const [activeFilter, setActiveFilter] = useState<number | null>(null);
 
   const scheduledItemIds = new Set(
@@ -48,11 +50,6 @@ export default function ItemsPage() {
     };
     fetchData();
   }, []);
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2800);
-  };
 
   const handleSaved = (saved: Item, savedSchedule: Record<string, number>) => {
     const isNew = !items.some(i => i.id === saved.id);
@@ -227,15 +224,7 @@ export default function ItemsPage() {
       )}
 
       {/* Toast */}
-      {toast && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-medium z-40 shadow-lg whitespace-nowrap"
-        >
-          ✓ {toast}
-        </div>
-      )}
+      <Toast message={toast} />
     </div>
   );
 }
