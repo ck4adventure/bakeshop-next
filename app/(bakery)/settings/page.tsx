@@ -2,11 +2,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 type BakerySettings = {
   id: string;
   name: string;
   slug: string;
 };
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function NavRow({ label, href }: { label: string; href: string }) {
   return (
@@ -19,6 +23,8 @@ function NavRow({ label, href }: { label: string; href: string }) {
     </Link>
   );
 }
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<BakerySettings | null>(null);

@@ -1,6 +1,9 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react';
 import ModalShell from '@/components/modal-shell';
+import { WEEKDAYS, WEEKDAY_SHORT, type Weekday } from '@/lib/weekdays';
+import { useToast } from '@/lib/use-toast';
+import Toast from '@/components/toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -12,10 +15,6 @@ type OverrideMap = Record<number, OverrideEntry>;           // itemId → { foh,
 type AllOverrides = Record<string, OverrideMap>;            // dateStr → OverrideMap
 
 // ─── Weekday helpers ──────────────────────────────────────────────────────────
-
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
-const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
-type Weekday = typeof WEEKDAYS[number];
 
 function getOrderedWeekdays(startDay: Weekday): Weekday[] {
   const startIdx = WEEKDAYS.indexOf(startDay);
@@ -340,7 +339,7 @@ export default function SchedulePage() {
   const [selectedDayIdx, setSelectedDayIdx] = useState(getTodayIdx);
   const [weeklySheet, setWeeklySheet] = useState<{ item: Item; existing: number | null } | null>(null);
 
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
 
   const upcomingDates = getUpcomingDates();
   const filteredUpcomingDates = operatingDays.length === 0
@@ -432,15 +431,9 @@ export default function SchedulePage() {
       }
     };
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchAllUpcomingOverrides]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2800);
-  };
 
   const handleWeeklySaved = (itemId: number, weekday: Weekday, quantity: number) => {
     setScheduleMap(prev => ({ ...prev, [weekday]: { ...(prev[weekday] ?? {}), [itemId]: quantity } }));
@@ -740,12 +733,7 @@ export default function SchedulePage() {
       )}
 
       {/* Toast */}
-      {toast && (
-        <div role="status" aria-live="polite"
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-medium z-40 shadow-lg whitespace-nowrap">
-          ✓ {toast}
-        </div>
-      )}
+      <Toast message={toast} />
     </div>
   );
 }

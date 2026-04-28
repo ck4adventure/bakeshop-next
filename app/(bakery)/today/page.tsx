@@ -1,6 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react';
 import ModalShell from '@/components/modal-shell';
+import { WEEKDAYS } from '@/lib/weekdays';
+import { useToast } from '@/lib/use-toast';
+import Toast from '@/components/toast';
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -30,8 +33,6 @@ type ScheduleEntry = {
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
 function getTodayWeekday(): string {
   return WEEKDAYS[new Date().getDay()];
@@ -68,6 +69,21 @@ const READINESS_COLOR: Record<BakeReadiness, string> = {
 };
 
 const DONE_COLOR = 'var(--status-above-par-text)';
+
+function sortBakeList(
+  list: { entry: ScheduleEntry; stock: number }[],
+  baked: Record<number, unknown>,
+) {
+  list.sort((a, b) => {
+    const aBaked = a.entry.itemId in baked;
+    const bBaked = b.entry.itemId in baked;
+    if (aBaked !== bBaked) return aBaked ? 1 : -1;
+    return (
+      READINESS_ORDER[getReadiness(a.stock, a.entry.quantity)] -
+      READINESS_ORDER[getReadiness(b.stock, b.entry.quantity)]
+    );
+  });
+}
 
 function BakeCard({
   entry,
@@ -330,7 +346,7 @@ export default function TodayPage() {
   const [saving, setSaving] = useState(false);
   const [completionFilter, setCompletionFilter] = useState<CompletionFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -411,22 +427,6 @@ export default function TodayPage() {
     fetchData();
   }, []);
 
-  // Sort: unbaked empty → unbaked low → unbaked sufficient → baked
-  function sortBakeList(
-    list: { entry: ScheduleEntry; stock: number }[],
-    baked: Record<number, unknown>,
-  ) {
-    list.sort((a, b) => {
-      const aBaked = a.entry.itemId in baked;
-      const bBaked = b.entry.itemId in baked;
-      if (aBaked !== bBaked) return aBaked ? 1 : -1;
-      return (
-        READINESS_ORDER[getReadiness(a.stock, a.entry.quantity)] -
-        READINESS_ORDER[getReadiness(b.stock, b.entry.quantity)]
-      );
-    });
-  }
-
   const handleConfirmBake = async (quantity: number, note: string) => {
     if (!selectedBake) return;
     setSaving(true);
@@ -492,11 +492,6 @@ export default function TodayPage() {
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Something went wrong');
     }
-  };
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2800);
   };
 
   // Categories that have at least one item in today's bake list or attention list
@@ -663,15 +658,7 @@ export default function TodayPage() {
       )}
 
       {/* Toast */}
-      {toast && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-medium z-40 shadow-lg whitespace-nowrap"
-        >
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
     </div>
   );
 }
