@@ -1,30 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { mutate } from 'swr';
 import Link from 'next/link';
 import { WEEKDAYS, type Weekday } from '@/lib/weekdays';
 import { useToast } from '@/lib/use-toast';
 import Toast from '@/components/toast';
+import { useBakerySettings } from '@/lib/swr-hooks';
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function OperatingDaysPage() {
+  const { data: settings, isLoading: loading, error } = useBakerySettings();
+  const fetchError = error ? 'Failed to load settings' : null;
   const [selected, setSelected] = useState<Set<Weekday>>(new Set());
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [seeded, setSeeded] = useState(false);
   const { toast, showToast } = useToast();
 
   useEffect(() => {
-    fetch(`/api/bakery/settings`, { credentials: 'include' })
-      .then(r => {
-        if (!r.ok) throw new Error('Failed to load settings');
-        return r.json();
-      })
-      .then(data => setSelected(new Set(data.operatingDays)))
-      .catch(err => setFetchError(err instanceof Error ? err.message : 'Something went wrong'))
-      .finally(() => setLoading(false));
-  }, []);
+    if (settings && !seeded) {
+      setSelected(new Set(settings.operatingDays as Weekday[]));
+      setSeeded(true);
+    }
+  }, [settings, seeded]);
 
   const toggle = (day: Weekday) => {
     setSelected(prev => {
@@ -47,6 +46,7 @@ export default function OperatingDaysPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error((data as { message?: string }).message ?? 'Save failed');
       }
+      mutate('/api/bakery/settings');
       showToast('Saved!');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Something went wrong');

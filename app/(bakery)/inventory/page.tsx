@@ -1,8 +1,10 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
+import { mutate } from 'swr';
 import ModalShell from '@/components/modal-shell';
 import { WEEKDAYS } from '@/lib/weekdays';
 import { useToast } from '@/lib/use-toast';
+import { useInventory, useProductionSchedule, useCategories, useBakerySettings } from '@/lib/swr-hooks';
 
 
 type ScheduleLookup = Map<number, Map<string, number>>; // itemId → weekday → quota
@@ -366,72 +368,36 @@ const FILTERS: { val: Filter; label: string }[] = [
 ];
 
 export default function InventoryPage() {
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [nextDayQuotaMap, setNextDayQuotaMap] = useState<Record<number, number>>({});
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const { data: inventory = [], error: invError, isLoading: loading } = useInventory();
+  const { data: scheduleEntries = [] } = useProductionSchedule();
+  const { data: categories = [] } = useCategories();
+  const { data: settings } = useBakerySettings();
+  const fetchError = invError ? 'Failed to load inventory' : null;
 
-  const [runoutDateMap, setRunoutDateMap] = useState<Record<number, Date | null>>({});
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [saving, setSaving] = useState(false);
-
   const [filter, setFilter] = useState<Filter>('all');
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const { toast, showToast } = useToast();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [invRes, schedRes, catsRes, settingsRes] = await Promise.all([
-          fetch(`/api/inventory`, { credentials: 'include' }),
-          fetch(`/api/production-schedule`, { credentials: 'include' }),
-          fetch(`/api/categories`, { credentials: 'include' }),
-          fetch(`/api/bakery/settings`, { credentials: 'include' }),
-        ]);
-        if (!invRes.ok) throw new Error('Failed to load inventory');
-        if (!schedRes.ok) throw new Error('Failed to load schedule');
+  const nextDayQuotaMap = useMemo(() => {
+    const tomorrow = getTomorrowWeekday();
+    const quotaMap: Record<number, number> = {};
+    for (const entry of scheduleEntries) {
+      if (entry.weekday === tomorrow) quotaMap[entry.itemId] = entry.quantity;
+    }
+    return quotaMap;
+  }, [scheduleEntries]);
 
-        const [invData, schedData, settingsData]: [InventoryItem[], ScheduleEntry[], BakerySettings] =
-          await Promise.all([
-            invRes.json(),
-            schedRes.json(),
-            settingsRes.ok ? settingsRes.json() : Promise.resolve({ operatingDays: [] }),
-          ]);
-
-        setInventory(invData);
-        setCategories(catsRes.ok ? await catsRes.json() : []);
-
-        const tomorrow = getTomorrowWeekday();
-        const quotaMap: Record<number, number> = {};
-        for (const entry of schedData) {
-          if (entry.weekday === tomorrow) {
-            quotaMap[entry.itemId] = entry.quantity;
-          }
-        }
-        setNextDayQuotaMap(quotaMap);
-
-        const scheduleLookup = buildScheduleLookup(schedData);
-        const operatingDaysSet = new Set<string>(settingsData.operatingDays);
-        const runoutMap: Record<number, Date | null> = {};
-        for (const invItem of invData) {
-          runoutMap[invItem.itemId] = computeRunoutDate(
-            invItem.quantity,
-            invItem.itemId,
-            scheduleLookup,
-            operatingDaysSet,
-          );
-        }
-        setRunoutDateMap(runoutMap);
-      } catch (err) {
-        setFetchError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const runoutDateMap = useMemo(() => {
+    const scheduleLookup = buildScheduleLookup(scheduleEntries);
+    const operatingDaysSet = new Set<string>(settings?.operatingDays ?? []);
+    const map: Record<number, Date | null> = {};
+    for (const invItem of inventory) {
+      map[invItem.itemId] = computeRunoutDate(invItem.quantity, invItem.itemId, scheduleLookup, operatingDaysSet);
+    }
+    return map;
+  }, [inventory, scheduleEntries, settings]);
 
   const handleConfirmBatch = async (item: InventoryItem, count: number) => {
     setSaving(true);
@@ -443,9 +409,7 @@ export default function InventoryPage() {
         body: JSON.stringify({ itemId: item.itemId, quantity: count }),
       });
       if (!res.ok) throw new Error('Failed to save batch');
-      setInventory(inv =>
-        inv.map(i => i.itemId === item.itemId ? { ...i, quantity: i.quantity + count } : i)
-      );
+      mutate('/api/inventory');
       setSelectedItem(null);
       showToast(`+${count} ${item.item.name} added`);
     } catch {
@@ -468,9 +432,7 @@ export default function InventoryPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error((data as { message?: string }).message ?? 'Failed to save adjustment');
       }
-      setInventory(inv =>
-        inv.map(i => i.itemId === item.itemId ? { ...i, quantity: i.quantity + delta } : i)
-      );
+      mutate('/api/inventory');
       setSelectedItem(null);
       showToast(`${item.item.name} adjusted ${delta > 0 ? `+${delta}` : delta}`);
     } catch (err) {

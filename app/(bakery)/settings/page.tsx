@@ -1,14 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type BakerySettings = {
-  id: string;
-  name: string;
-  slug: string;
-};
+import { useBakerySettings } from '@/lib/swr-hooks';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -27,15 +19,7 @@ function NavRow({ label, href }: { label: string; href: string }) {
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<BakerySettings | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/bakery/settings', { credentials: 'include' })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setSettings(data); })
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: settings, isLoading: loading } = useBakerySettings();
 
   return (
     <div className="min-h-screen bg-background">

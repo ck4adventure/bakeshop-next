@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useInventoryHistory } from '@/lib/swr-hooks';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -56,25 +56,9 @@ function groupByDay(entries: HistoryEntry[]): { label: string; items: HistoryEnt
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function HistoryPage() {
-  const [entries, setEntries] = useState<HistoryEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch('/api/inventory/history', { credentials: 'include' });
-        if (!res.ok) throw new Error('Failed to load history');
-        const data: HistoryEntry[] = await res.json();
-        setEntries(data);
-      } catch (err) {
-        setFetchError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchHistory();
-  }, []);
+  const { data, error, isLoading: loading } = useInventoryHistory();
+  const entries = (data ?? []) as HistoryEntry[];
+  const fetchError = error ? 'Failed to load history' : null;
 
   const groups = groupByDay(entries);
 

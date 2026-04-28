@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useId } from 'react';
+import { mutate } from 'swr';
 import ModalShell from './modal-shell';
 import NumericField from './numeric-field';
 import InfoTooltip from './info-tooltip';
@@ -110,6 +111,7 @@ export function ItemSheet({
           throw new Error((data as { message?: string }).message ?? 'Failed to create category');
         }
         const newCat: Category = await catRes.json();
+        mutate('/api/categories');
         onCategoryCreated(newCat);
         resolvedCategoryId = newCat.id;
       } else if (selectedCategoryId !== '') {
@@ -184,6 +186,7 @@ export function ItemSheet({
         }
 
         await Promise.all(scheduleOps);
+        mutate('/api/production-schedule');
       }
 
       // Build the schedule state as it now exists in the DB
@@ -194,6 +197,7 @@ export function ItemSheet({
         if (qty !== null && !isNaN(qty)) savedSchedule[day] = qty;
       }
 
+      mutate('/api/items');
       onSaved(saved, savedSchedule);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -210,6 +214,8 @@ export function ItemSheet({
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Delete failed');
+      mutate('/api/items');
+      mutate('/api/production-schedule');
       onDeleted?.(state.item.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
