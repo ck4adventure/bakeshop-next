@@ -28,26 +28,26 @@ const categories_demo_data = [
 
 // categoryName is used to look up the seeded category id after upsert
 const items_demo_data = [
-	{ name: "Sticky Bun",                            slug: "sticky-bun",                    categoryName: "Sweet Pastry",  initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Berry Streusel Muffin",                 slug: "berry-muffin",                  categoryName: "Sweet Pastry",  initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Candied Ginger Scone",                  slug: "ginger-scone",                  categoryName: "Sweet Pastry",  initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Berry Danish",                          slug: "berry-danish",                  categoryName: "Sweet Pastry",  initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Cardamom Donut Muffin",                 slug: "cardamom-donut-muffin",         categoryName: "Sweet Pastry",  initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Apple Frangipane Turnover",             slug: "apple-turnover",                categoryName: "Sweet Pastry",  initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Ham Turnover with Le Gruyere",          slug: "ham-turnover",                  categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Curried Cauliflower Galette",           slug: "spanakopita-galette",           categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Sharp White Cheddar and Scallion Scone",slug: "cheddar-scallion-scone",        categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Gougere with Le Gruyere (herbed)",      slug: "herbed-gougere",                categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Ham Quiche with Le Gruyere",            slug: "ham-quiche",                    categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Roasted Vegetable and Cheddar Quiche",  slug: "roasted-vegetable-quiche",      categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Mozzarella Focaccia",                   slug: "mozzarella-focaccia",           categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Sandwich of the Day",                   slug: "sandwich-of-the-day",           categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Tahini Jam Cookie",                     slug: "tahini-jam-cookie",             categoryName: "Cookies",       initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Lemon Snap Cookie",                     slug: "lemon-snap-cookie",             categoryName: "Cookies",       initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Tahini Chocolate Chip Cookie",          slug: "tahini-chocolate-chip-cookie",  categoryName: "Cookies",       initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Oatmeal Raisin Cookie",                 slug: "oatmeal-raisin-cookie",         categoryName: "Cookies",       initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Chocolate Chip Cookie",                 slug: "chocolate-chip-cookie",         categoryName: "Cookies",       initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
-	{ name: "Coconut Macaroon",                      slug: "coconut-macaroon",              categoryName: "Cookies",       initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
+	{ name: "Sticky Bun",                            slug: "sticky-bun",                    categoryName: "Sweet Pastry",  initialQty: 144, schedule: { Wednesday: 12, Thursday: 12, Friday: 12, Saturday: 24, Sunday: 12 } },
+	{ name: "Berry Streusel Muffin",                 slug: "berry-muffin",                  categoryName: "Sweet Pastry",  initialQty: 108, schedule: { Wednesday: 12, Thursday: 12, Friday: 15, Saturday: 21, Sunday: 15 } },
+	{ name: "Candied Ginger Scone",                  slug: "ginger-scone",                  categoryName: "Sweet Pastry",  initialQty: 58, schedule: { Wednesday: 9, Thursday: 6, Friday: 9, Saturday: 12, Sunday: 9 } },
+	{ name: "Berry Danish",                          slug: "berry-danish",                  categoryName: "Sweet Pastry",  initialQty: 70, schedule: { Wednesday: 6, Thursday: 6, Friday: 9, Saturday: 12, Sunday: 9 } },
+	{ name: "Cardamom Donut Muffin",                 slug: "cardamom-donut-muffin",         categoryName: "Sweet Pastry",  initialQty: 116, schedule: { Wednesday: 12, Thursday: 12, Friday: 15, Saturday: 21, Sunday: 15 } },
+	{ name: "Apple Frangipane Turnover",             slug: "apple-turnover",                categoryName: "Sweet Pastry",  initialQty: 73, schedule: { Wednesday: 6, Thursday: 6, Friday: 9, Saturday: 12, Sunday: 9 } },
+	{ name: "Ham Turnover with Le Gruyere",          slug: "ham-turnover",                  categoryName: "Savory Pastry", initialQty: 55, schedule: { Wednesday: 15, Thursday: 15, Friday: 20, Saturday: 20, Sunday: 20 } },
+	{ name: "Curried Cauliflower Galette",           slug: "spanakopita-galette",           categoryName: "Savory Pastry", initialQty: 131, schedule: { Wednesday: 12, Thursday: 12, Friday: 15, Saturday: 15, Sunday: 12 } },
+	{ name: "Sharp White Cheddar and Scallion Scone",slug: "cheddar-scallion-scone",        categoryName: "Savory Pastry", initialQty: 133, schedule: { Wednesday: 18, Thursday: 15, Friday: 18, Saturday: 21, Sunday: 18 } },
+	{ name: "Gougere with Le Gruyere (herbed)",      slug: "herbed-gougere",                categoryName: "Savory Pastry", initialQty: 110, schedule: { Wednesday: 12, Thursday: 9, Friday: 12, Saturday: 15, Sunday: 12 } },
+	{ name: "Ham Quiche with Le Gruyere",            slug: "ham-quiche",                    categoryName: "Savory Pastry", initialQty: 0, schedule: { Wednesday: 1, Thursday: 1, Friday: 1, Saturday: 2, Sunday: 1 } },
+	{ name: "Roasted Vegetable and Cheddar Quiche",  slug: "roasted-vegetable-quiche",      categoryName: "Savory Pastry", initialQty: 3, schedule: { Wednesday: 2, Thursday: 2, Friday: 2, Saturday: 3, Sunday: 2 } },
+	{ name: "Mozzarella Focaccia",                   slug: "mozzarella-focaccia",           categoryName: "Savory Pastry", initialQty: 12, schedule: { Wednesday: 12, Thursday: 12, Friday: 12, Saturday: 12, Sunday: 12 } },
+	{ name: "Sandwich of the Day",                   slug: "sandwich-of-the-day",           categoryName: "Savory Pastry", initialQty: 24, schedule: { Wednesday: 12, Thursday: 24, Friday: 24, Saturday: 18, Sunday: 12 } },
+	{ name: "Tahini Jam Cookie",                     slug: "tahini-jam-cookie",             categoryName: "Cookies",       initialQty: 83, schedule: { Wednesday: 15, Thursday: 12, Friday: 18, Saturday: 18, Sunday: 15 } },
+	{ name: "Lemon Snap Cookie",                     slug: "lemon-snap-cookie",             categoryName: "Cookies",       initialQty: 49, schedule: { Wednesday: 9, Thursday: 6, Friday: 9, Saturday: 12, Sunday: 9 } },
+	{ name: "Tahini Chocolate Chip Cookie",          slug: "tahini-chocolate-chip-cookie",  categoryName: "Cookies",       initialQty: 128, schedule: { Wednesday: 9, Thursday: 6, Friday: 9, Saturday: 12, Sunday: 9 } },
+	{ name: "Oatmeal Raisin Cookie",                 slug: "oatmeal-raisin-cookie",         categoryName: "Cookies",       initialQty: 136, schedule: { Wednesday: 9, Thursday: 6, Friday: 9, Saturday: 12, Sunday: 9 } },
+	{ name: "Chocolate Chip Cookie",                 slug: "chocolate-chip-cookie",         categoryName: "Cookies",       initialQty: 99, schedule: { Wednesday: 18, Thursday: 15, Friday: 18, Saturday: 21, Sunday: 18 } },
+	{ name: "Coconut Macaroon",                      slug: "coconut-macaroon",              categoryName: "Cookies",       initialQty: 144, schedule: { Wednesday: 12, Thursday: 12, Friday: 12, Saturday: 12, Sunday: 12 } },
 	// { name: "Lemon Bars", slug: "lemon-bars", categoryName: "Bars", initialQty: 0, schedule: { Wednesday: 0, Thursday: 0, Friday: 0, Saturday: 0, Sunday: 0 } },
 
 ];
@@ -103,7 +103,7 @@ async function main() {
 
 		if (item.initialQty > 0) {
 			await prisma.$transaction([
-				prisma.itemInventory.create({ data: { itemId: itemResult.id, quantity: item.initialQty } }),
+				prisma.itemInventory.create({ data: { itemId: itemResult.id } }),
 				prisma.inventoryTransaction.create({
 					data: { itemId: itemResult.id, delta: item.initialQty, reason: InventoryReason.INITIAL },
 				}),
