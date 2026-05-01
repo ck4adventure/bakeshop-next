@@ -65,7 +65,7 @@ export default function ModalShell({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-6">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
       <div
         ref={dialogRef}
@@ -73,7 +73,7 @@ export default function ModalShell({
         aria-modal="true"
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
-        className={`relative bg-card rounded-2xl px-6 pt-6 pb-8 z-50 ${maxWidth} w-full mx-auto shadow-xl`}
+        className={`relative bg-card rounded-t-2xl sm:rounded-2xl px-6 pt-6 pb-8 z-50 ${maxWidth} w-full mx-auto shadow-xl overflow-y-auto max-h-[90dvh]`}
       >
         {children}
       </div>

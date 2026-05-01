@@ -100,7 +100,7 @@ function BakeCard({
   const quota = entry.quantity;
   const isBaked = bakedQty !== null;
   const readiness = getReadiness(stock, quota);
-  const canTap = !isBaked && stock > 0;
+  const canTap = !isBaked;
 
   const accentColor = isBaked ? DONE_COLOR : READINESS_COLOR[readiness];
   const barPct = isBaked
@@ -240,7 +240,7 @@ function BakeModal({
         {/* Count stepper */}
         <div className="flex items-center justify-center gap-6 mb-5">
           <button
-            onClick={() => setCount(c => Math.max(1, c - 1))}
+            onClick={() => setCount(c => Math.max(0, c - 1))}
             aria-label="Decrease quantity"
             className="w-14 h-14 rounded-full border border-border bg-background text-2xl text-foreground flex items-center justify-center cursor-pointer"
           >
@@ -328,15 +328,18 @@ const COMPLETION_FILTERS: { val: CompletionFilter; label: string }[] = [
 ];
 
 export default function TodayPage() {
-  const todayDateStr = useMemo(() => {
+  const { todayDateStr, todayStartISO } = useMemo(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return {
+      todayDateStr: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+      todayStartISO: new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
+    };
   }, []);
 
   const { data: invData, error: invError, isLoading: loading } = useInventory();
   const { data: schedData } = useProductionSchedule();
   const { data: catsData = [] } = useCategories();
-  const { data: todayBakesData = [] } = useTodayBakes();
+  const { data: todayBakesData = [] } = useTodayBakes(todayStartISO);
   const { data: overridesData = [] } = useScheduleOverrides(todayDateStr);
   const fetchError = invError ? 'Failed to load inventory' : null;
 
@@ -435,7 +438,7 @@ export default function TodayPage() {
       setBakeList(updatedList);
 
       mutate('/api/inventory');
-      mutate('/api/inventory/bakes/today');
+      mutate((key: unknown) => typeof key === 'string' && key.startsWith('/api/inventory/bakes/today'));
       setSelectedBake(null);
       showToast(`${selectedBake.entry.item.name} — ${quantity} baked`);
     } catch (err) {
@@ -467,7 +470,7 @@ export default function TodayPage() {
       setBakeList(updatedList);
 
       mutate('/api/inventory');
-      mutate('/api/inventory/bakes/today');
+      mutate((key: unknown) => typeof key === 'string' && key.startsWith('/api/inventory/bakes/today'));
       showToast('Bake undone');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Something went wrong');

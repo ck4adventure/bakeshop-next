@@ -9,8 +9,8 @@ export async function POST(req: Request) {
   }
 
   const { itemId, quantity, note } = await req.json()
-  if (typeof itemId !== 'number' || typeof quantity !== 'number' || quantity <= 0) {
-    return Response.json({ message: 'itemId and a positive quantity are required' }, { status: 400 })
+  if (typeof itemId !== 'number' || typeof quantity !== 'number' || quantity < 0) {
+    return Response.json({ message: 'itemId and a non-negative quantity are required' }, { status: 400 })
   }
 
   const item = await prisma.item.findFirst({ where: { id: itemId, bakeryId: session.user.bakeryId } })

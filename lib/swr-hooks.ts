@@ -20,8 +20,10 @@ export function useInventory() {
   return useSWR<InventoryItem[]>('/api/inventory');
 }
 
-export function useTodayBakes() {
-  return useSWR<{ id: number; itemId: number; quantity: number }[]>('/api/inventory/bakes/today');
+export function useTodayBakes(from: string) {
+  return useSWR<{ id: number; itemId: number; quantity: number }[]>(
+    `/api/inventory/bakes/today?from=${encodeURIComponent(from)}`
+  );
 }
 
 export function useInventoryHistory() {
