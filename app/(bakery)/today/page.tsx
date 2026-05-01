@@ -328,15 +328,18 @@ const COMPLETION_FILTERS: { val: CompletionFilter; label: string }[] = [
 ];
 
 export default function TodayPage() {
-  const todayDateStr = useMemo(() => {
+  const { todayDateStr, todayStartISO } = useMemo(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return {
+      todayDateStr: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+      todayStartISO: new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString(),
+    };
   }, []);
 
   const { data: invData, error: invError, isLoading: loading } = useInventory();
   const { data: schedData } = useProductionSchedule();
   const { data: catsData = [] } = useCategories();
-  const { data: todayBakesData = [] } = useTodayBakes();
+  const { data: todayBakesData = [] } = useTodayBakes(todayStartISO);
   const { data: overridesData = [] } = useScheduleOverrides(todayDateStr);
   const fetchError = invError ? 'Failed to load inventory' : null;
 
@@ -435,7 +438,7 @@ export default function TodayPage() {
       setBakeList(updatedList);
 
       mutate('/api/inventory');
-      mutate('/api/inventory/bakes/today');
+      mutate((key: unknown) => typeof key === 'string' && key.startsWith('/api/inventory/bakes/today'));
       setSelectedBake(null);
       showToast(`${selectedBake.entry.item.name} — ${quantity} baked`);
     } catch (err) {
@@ -467,7 +470,7 @@ export default function TodayPage() {
       setBakeList(updatedList);
 
       mutate('/api/inventory');
-      mutate('/api/inventory/bakes/today');
+      mutate((key: unknown) => typeof key === 'string' && key.startsWith('/api/inventory/bakes/today'));
       showToast('Bake undone');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Something went wrong');
