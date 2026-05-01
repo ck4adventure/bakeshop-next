@@ -100,7 +100,7 @@ function BakeCard({
   const quota = entry.quantity;
   const isBaked = bakedQty !== null;
   const readiness = getReadiness(stock, quota);
-  const canTap = !isBaked && stock > 0;
+  const canTap = !isBaked;
 
   const accentColor = isBaked ? DONE_COLOR : READINESS_COLOR[readiness];
   const barPct = isBaked
@@ -240,7 +240,7 @@ function BakeModal({
         {/* Count stepper */}
         <div className="flex items-center justify-center gap-6 mb-5">
           <button
-            onClick={() => setCount(c => Math.max(1, c - 1))}
+            onClick={() => setCount(c => Math.max(0, c - 1))}
             aria-label="Decrease quantity"
             className="w-14 h-14 rounded-full border border-border bg-background text-2xl text-foreground flex items-center justify-center cursor-pointer"
           >
