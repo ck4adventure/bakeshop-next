@@ -56,12 +56,12 @@ export async function POST(req: Request) {
     include: { category: { select: { id: true, name: true } } },
   })
 
-  const qty = (initialQty != null && initialQty > 0) ? initialQty : 0
-  await prisma.itemInventory.create({ data: { itemId: item.id, quantity: qty } })
-  if (qty > 0) {
+  if (initialQty != null && initialQty > 0) {
     await prisma.inventoryTransaction.create({
-      data: { itemId: item.id, delta: qty, reason: 'INITIAL' },
+      data: { itemId: item.id, delta: initialQty, reason: 'INITIAL' },
     })
+  } else {
+    await prisma.itemInventory.create({ data: { itemId: item.id, quantity: 0 } })
   }
 
   return Response.json(item, { status: 201 })

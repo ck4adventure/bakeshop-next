@@ -102,13 +102,12 @@ async function main() {
 		console.log("item seeded: ", itemResult.slug);
 
 		if (item.initialQty > 0) {
-			await prisma.$transaction([
-				prisma.itemInventory.create({ data: { itemId: itemResult.id } }),
-				prisma.inventoryTransaction.create({
-					data: { itemId: itemResult.id, delta: item.initialQty, reason: InventoryReason.INITIAL },
-				}),
-			])
+			await prisma.inventoryTransaction.create({
+				data: { itemId: itemResult.id, delta: item.initialQty, reason: InventoryReason.INITIAL },
+			})
 			console.log(`initial qty seeded for: ${itemResult.slug} (qty: ${item.initialQty})`)
+		} else {
+			await prisma.itemInventory.create({ data: { itemId: itemResult.id, quantity: 0 } })
 		}
 
 		// set per-item production schedule
