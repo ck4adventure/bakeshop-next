@@ -542,21 +542,16 @@ export default function SchedulePage() {
 
                 {/* Calendar picker button */}
                 <div className="relative shrink-0">
-                  <button
-                    onClick={() => {
-                      setTimeout(() => datePickerRef.current?.showPicker?.(), 50);
-                    }}
-                    className="px-3 py-1.5 rounded-full border border-border text-[13px] text-muted-foreground cursor-pointer transition-colors"
-                    aria-label="Pick a date"
-                  >
+                  <div className="px-3 py-1.5 rounded-full border border-border text-[13px] text-muted-foreground" aria-hidden="true">
                     📅
-                  </button>
+                  </div>
                   <input
                     ref={datePickerRef}
                     type="date"
                     min={getTomorrowStr()}
                     max={getTwoMonthsOutStr()}
-                    className="absolute opacity-0 pointer-events-none w-0 h-0"
+                    aria-label="Pick a date"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     onChange={e => {
                       const val = e.target.value;
                       if (!val) return;
