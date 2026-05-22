@@ -4,6 +4,7 @@ const mockGetServerSession = vi.hoisted(() => vi.fn())
 const mockPrisma = vi.hoisted(() => ({
   category: {
     findMany: vi.fn(),
+    findFirst: vi.fn(),
     create: vi.fn(),
   },
 }))
@@ -55,6 +56,7 @@ describe('POST /api/categories', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetServerSession.mockResolvedValue(fakeSession)
+    mockPrisma.category.findFirst.mockResolvedValue(null) // no duplicate by default
     mockPrisma.category.create.mockResolvedValue(fakeCategory)
   })
 
@@ -72,6 +74,13 @@ describe('POST /api/categories', () => {
   it('returns 400 when name is only whitespace', async () => {
     const res = await POST(makeRequest({ name: '   ' }))
     expect(res.status).toBe(400)
+  })
+
+  it('returns 409 when a category with the same name already exists in the bakery', async () => {
+    mockPrisma.category.findFirst.mockResolvedValue(fakeCategory)
+    const res = await POST(makeRequest({ name: 'Pastries' }))
+    expect(res.status).toBe(409)
+    expect(mockPrisma.category.create).not.toHaveBeenCalled()
   })
 
   it('creates category and returns 201', async () => {
