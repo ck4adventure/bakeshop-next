@@ -126,9 +126,10 @@ model DailyQuotaOverride {
 }
 
 model ProductionSchedule {
-  itemId Int  
-	weekday Weekday
-	quantity Int @default(0)
-  item   Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
-	@@id([itemId, weekday])
+  itemId   Int
+  weekday  Weekday
+  quantity Int?
+  item     Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, weekday])
 }

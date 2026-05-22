@@ -27,6 +27,13 @@ export async function POST(req: Request) {
     return Response.json({ message: 'Name is required' }, { status: 400 })
   }
 
+  const existing = await prisma.category.findFirst({
+    where: { name: name.trim(), bakeryId: session.user.bakeryId },
+  })
+  if (existing) {
+    return Response.json({ message: 'A category with that name already exists' }, { status: 409 })
+  }
+
   const category = await prisma.category.create({
     data: { name: name.trim(), bakeryId: session.user.bakeryId },
   })
