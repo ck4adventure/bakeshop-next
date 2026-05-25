@@ -5,6 +5,7 @@ import { mutate } from 'swr';
 import ModalShell from './modal-shell';
 import NumericField from './numeric-field';
 import InfoTooltip from './info-tooltip';
+import { useInventory } from '@/lib/swr-hooks';
 
 
 type Category = {
@@ -51,6 +52,11 @@ export function ItemSheet({
   const initialQtyId = useId();
   const categoryId = useId();
   const newCategoryId = useId();
+
+  const { data: inventory } = useInventory();
+  const currentQty = state.mode === 'edit'
+    ? inventory?.find(i => i.itemId === state.item.id)?.quantity ?? null
+    : null;
 
   const initial = state.mode === 'edit' ? state.item : null;
   const [name, setName] = useState(initial?.name ?? '');
@@ -229,7 +235,7 @@ export function ItemSheet({
   return (
     <ModalShell onClose={onClose} maxWidth="max-w-[630px]">
         <h2 className="text-xl font-semibold text-foreground mb-6">
-          {state.mode === 'add' ? 'New Item' : 'Edit Item'}
+          {state.mode === 'add' ? 'New Item' : 'Manage Item'}
         </h2>
 
         {error && (
@@ -251,33 +257,43 @@ export function ItemSheet({
           />
         </div>
 
-        {/* Category */}
-        <div className="mb-4">
-          <label htmlFor={categoryId} className="block text-sm font-medium text-foreground mb-1.5">
-            Category <span className="text-muted-foreground font-normal">(optional)</span>
-          </label>
-          <select
-            id={categoryId}
-            value={selectedCategoryId}
-            onChange={e => setSelectedCategoryId(e.target.value)}
-            className="w-full h-12 rounded-xl border border-border bg-background px-4 text-[15px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="">No category</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
-            ))}
-            <option value="__new__">+ Add new category</option>
-          </select>
-          {isAddingNew && (
-            <input
-              id={newCategoryId}
-              type="text"
-              value={newCategoryName}
-              onChange={e => setNewCategoryName(e.target.value)}
-              placeholder="New category name"
-              className="mt-2 w-full h-12 rounded-xl border border-border bg-background px-4 text-[15px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              autoFocus
-            />
+        {/* Category + Current Qty (edit mode) */}
+        <div className="mb-4 flex gap-3 items-start">
+          <div className={state.mode === 'edit' ? 'w-[70%] min-w-0' : 'w-full'}>
+            <label htmlFor={categoryId} className="block text-sm font-medium text-foreground mb-1.5">
+              Category <span className="text-muted-foreground font-normal">(optional)</span>
+            </label>
+            <select
+              id={categoryId}
+              value={selectedCategoryId}
+              onChange={e => setSelectedCategoryId(e.target.value)}
+              className="w-full h-12 rounded-xl border border-border bg-background px-4 text-[15px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">No category</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+              ))}
+              <option value="__new__">+ Add new category</option>
+            </select>
+            {isAddingNew && (
+              <input
+                id={newCategoryId}
+                type="text"
+                value={newCategoryName}
+                onChange={e => setNewCategoryName(e.target.value)}
+                placeholder="New category name"
+                className="mt-2 w-full h-12 rounded-xl border border-border bg-background px-4 text-[15px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                autoFocus
+              />
+            )}
+          </div>
+          {state.mode === 'edit' && (
+            <div className="w-[30%] shrink-0">
+              <p className="text-sm font-medium text-foreground mb-1.5">Current Qty</p>
+              <div className="h-12 flex items-center px-4 rounded-xl border border-border bg-muted/40 text-[15px] text-foreground">
+                {currentQty ?? '—'}
+              </div>
+            </div>
           )}
         </div>
 

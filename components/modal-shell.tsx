@@ -28,8 +28,7 @@ export default function ModalShell({
   useEffect(() => {
     returnFocusRef.current = document.activeElement;
 
-    const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE);
-    firstFocusable?.focus();
+    dialogRef.current?.focus();
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -73,7 +72,8 @@ export default function ModalShell({
         aria-modal="true"
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
-        className={`relative bg-card rounded-t-2xl sm:rounded-2xl px-6 pt-6 pb-8 z-50 ${maxWidth} w-full mx-auto shadow-xl overflow-y-auto max-h-[90dvh]`}
+        tabIndex={-1}
+        className={`relative bg-card rounded-t-2xl sm:rounded-2xl px-6 pt-6 pb-8 z-50 ${maxWidth} w-full mx-auto shadow-xl overflow-y-auto max-h-[90dvh] focus:outline-none`}
       >
         {children}
       </div>
