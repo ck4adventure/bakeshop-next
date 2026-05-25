@@ -10,7 +10,7 @@ export async function GET() {
   }
 
   const schedules = await prisma.productionSchedule.findMany({
-    where: { item: { bakeryId: session.user.bakeryId } },
+    where: { item: { bakeryId: session.user.bakeryId, isActive: true } },
     include: { item: { select: { name: true, slug: true, category: { select: { id: true, name: true } } } } },
   })
 
