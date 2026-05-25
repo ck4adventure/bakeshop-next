@@ -76,7 +76,7 @@ model Item {
 
 model InventoryTransaction {
   id         Int             @id @default(autoincrement())
-  product    Item            @relation(fields: [itemId], references: [id])
+  product    Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
   itemId     Int
   delta      Int             // positive = added to freezer, negative = removed (bake/adjustment)
   stockAfter Int             @default(0) // set by DB trigger; stock level after this transaction
@@ -88,7 +88,7 @@ model InventoryTransaction {
 model ItemInventory {
   itemId    Int      @id
   quantity  Int      @default(0)
-  item      Item     @relation(fields: [itemId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
   updatedAt DateTime @updatedAt
 }
 

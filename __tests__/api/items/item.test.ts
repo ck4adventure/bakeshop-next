@@ -13,6 +13,8 @@ vi.mock('@/lib/prisma', () => ({ default: mockPrisma }))
 vi.mock('next-auth', () => ({ getServerSession: mockGetServerSession }))
 vi.mock('@/lib/auth', () => ({ authOptions: {} }))
 
+import { Prisma } from '@/app/generated/prisma/client'
+
 import { GET } from '@/app/api/items/route'
 import { PATCH, DELETE } from '@/app/api/items/[slug]/route'
 
@@ -141,5 +143,23 @@ describe('DELETE /api/items/[slug]', () => {
     expect(mockPrisma.item.delete).toHaveBeenCalledWith({
       where: { slug_bakeryId: { slug: 'croissant', bakeryId: BAKERY_ID } },
     })
+  })
+
+  it('returns 404 when item does not exist', async () => {
+    mockPrisma.item.delete.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Record not found', { code: 'P2025', clientVersion: '0' })
+    )
+    const res = await DELETE(new Request('http://localhost'), makeParams('nonexistent'))
+    expect(res.status).toBe(404)
+    const body = await res.json()
+    expect(body.message).toBe('Item not found')
+  })
+
+  it('returns 500 on unexpected delete error', async () => {
+    mockPrisma.item.delete.mockRejectedValue(new Error('DB connection lost'))
+    const res = await DELETE(new Request('http://localhost'), makeParams('croissant'))
+    expect(res.status).toBe(500)
+    const body = await res.json()
+    expect(body.message).toBe('Failed to delete item')
   })
 })

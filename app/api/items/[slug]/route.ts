@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { Prisma } from '@/app/generated/prisma/client'
 
 export async function PATCH(
   req: Request,
@@ -40,9 +41,16 @@ export async function DELETE(
 
   const { slug } = await params
 
-  await prisma.item.delete({
-    where: { slug_bakeryId: { slug, bakeryId: session.user.bakeryId } },
-  })
+  try {
+    await prisma.item.delete({
+      where: { slug_bakeryId: { slug, bakeryId: session.user.bakeryId } },
+    })
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+      return Response.json({ message: 'Item not found' }, { status: 404 })
+    }
+    return Response.json({ message: 'Failed to delete item' }, { status: 500 })
+  }
 
   return new Response(null, { status: 204 })
 }
