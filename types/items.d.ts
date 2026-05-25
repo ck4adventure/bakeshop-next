@@ -9,6 +9,7 @@ type Item = {
   slug: string;
   par: number | null;
   defaultBatchQty: number | null;
+  isActive: boolean;
   category: Category | null;
 };
 

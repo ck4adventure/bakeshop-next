@@ -64,6 +64,7 @@ model Item {
   bakeryId        String?
   category        Category?              @relation(fields: [categoryId], references: [id])
   categoryId      Int?
+  isActive        Boolean                @default(true)
   inventory       ItemInventory?
   schedules       ProductionSchedule[]
   transactions    InventoryTransaction[]

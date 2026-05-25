@@ -18,6 +18,7 @@ type Item = {
   slug: string;
   par: number | null;
   defaultBatchQty: number | null;
+  isActive: boolean;
   category: Category | null;
 };
 
@@ -60,6 +61,7 @@ export function ItemSheet({
   );
   const [newCategoryName, setNewCategoryName] = useState('');
   const [initialQtyInput, setInitialQtyInput] = useState('');
+  const [isActive, setIsActive] = useState(initial?.isActive ?? true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -124,6 +126,7 @@ export function ItemSheet({
         defaultBatchQty: parsedDefaultBatchQty,
         categoryId: resolvedCategoryId,
         ...(state.mode === 'add' && parsedInitialQty != null && parsedInitialQty > 0 && { initialQty: parsedInitialQty }),
+        ...(state.mode === 'edit' && { isActive }),
       };
 
       let res: Response;
@@ -325,6 +328,31 @@ export function ItemSheet({
             </div>
           )}
         </div>
+
+        {/* Active toggle (edit mode only) */}
+        {state.mode === 'edit' && (
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">Active</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Inactive items are hidden from the production schedule</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isActive}
+              onClick={() => setIsActive(v => !v)}
+              className={`relative shrink-0 inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                isActive ? 'bg-primary' : 'bg-border'
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                  isActive ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        )}
 
         {/* Save / Cancel */}
         <div className="flex gap-3">
