@@ -79,11 +79,15 @@ export default function ItemsPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-card border-b border-border px-4 pt-5 pb-3">
         <h1 className="text-[22px] font-bold text-foreground leading-none">Items</h1>
-        {!loading && !fetchError && (
-          <p className="text-[13px] text-muted-foreground mt-0.5">
-            {items.length} item{items.length !== 1 ? 's' : ''}
-          </p>
-        )}
+        {!loading && !fetchError && (() => {
+          const activeCount = items.filter(i => i.isActive).length;
+          const inactiveCount = items.length - activeCount;
+          return (
+            <p className="text-[13px] text-muted-foreground mt-0.5">
+              {activeCount} active{inactiveCount > 0 ? `, ${inactiveCount} inactive` : ''}
+            </p>
+          );
+        })()}
 
         {/* Filter chips */}
         {showChips && (
@@ -144,9 +148,18 @@ export default function ItemsPage() {
                 <button
                   key={item.id}
                   onClick={() => setSheet({ mode: 'edit', item })}
-                  className="w-full bg-card border border-border rounded-card px-4 py-3.5 flex justify-between items-center text-left cursor-pointer hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)] transition-[transform,box-shadow] duration-150"
+                  className={`w-full bg-card border border-border rounded-card px-4 py-3.5 flex justify-between items-center text-left cursor-pointer hover:-translate-y-px hover:shadow-[0_4px_16px_rgba(28,25,23,0.08)] transition-[transform,box-shadow] duration-150 ${
+                    !item.isActive ? 'opacity-50' : ''
+                  }`}
                 >
-                  <span className="text-[17px] font-medium text-foreground">{item.name}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[17px] font-medium text-foreground">{item.name}</span>
+                    {!item.isActive && (
+                      <span className="shrink-0 text-[11px] font-medium text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     <Calendar
                       size={15}
