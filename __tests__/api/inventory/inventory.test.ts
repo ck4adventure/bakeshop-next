@@ -35,7 +35,7 @@ describe('GET /api/inventory', () => {
     const res = await GET()
     expect(res.status).toBe(200)
     expect(mockPrisma.itemInventory.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { item: { bakeryId: BAKERY_ID } } })
+      expect.objectContaining({ where: { item: { bakeryId: BAKERY_ID, hasInventory: true } } })
     )
     const body = await res.json()
     expect(body).toHaveLength(1)

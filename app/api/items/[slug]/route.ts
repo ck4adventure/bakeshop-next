@@ -13,7 +13,7 @@ export async function PATCH(
   }
 
   const { slug } = await params
-  const { name, par, defaultBatchQty, categoryId, isActive } = await req.json()
+  const { name, par, defaultBatchQty, categoryId, isActive, hasInventory } = await req.json()
 
   const item = await prisma.item.update({
     where: { slug_bakeryId: { slug, bakeryId: session.user.bakeryId } },
@@ -23,6 +23,7 @@ export async function PATCH(
       defaultBatchQty: defaultBatchQty ?? null,
       categoryId: categoryId ?? null,
       ...(isActive !== undefined && { isActive }),
+      ...(hasInventory !== undefined && { hasInventory }),
     },
     include: { category: { select: { id: true, name: true } } },
   })

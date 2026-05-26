@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     return Response.json({ message: 'Unauthorized' }, { status: 401 })
   }
 
-  const { name, par, defaultBatchQty, categoryId, initialQty } = await req.json()
+  const { name, par, defaultBatchQty, categoryId, initialQty, hasInventory } = await req.json()
   if (!name?.trim()) {
     return Response.json({ message: 'Name is required' }, { status: 400 })
   }
@@ -44,6 +44,8 @@ export async function POST(req: Request) {
     slug = `${baseSlug}-${suffix++}`
   }
 
+  const trackInventory = hasInventory !== false
+
   const item = await prisma.item.create({
     data: {
       name: name.trim(),
@@ -52,16 +54,19 @@ export async function POST(req: Request) {
       defaultBatchQty: defaultBatchQty ?? null,
       categoryId: categoryId ?? null,
       bakeryId: session.user.bakeryId,
+      hasInventory: trackInventory,
     },
     include: { category: { select: { id: true, name: true } } },
   })
 
-  if (initialQty != null && initialQty > 0) {
-    await prisma.inventoryTransaction.create({
-      data: { itemId: item.id, delta: initialQty, reason: 'INITIAL' },
-    })
-  } else {
-    await prisma.itemInventory.create({ data: { itemId: item.id, quantity: 0 } })
+  if (trackInventory) {
+    if (initialQty != null && initialQty > 0) {
+      await prisma.inventoryTransaction.create({
+        data: { itemId: item.id, delta: initialQty, reason: 'INITIAL' },
+      })
+    } else {
+      await prisma.itemInventory.create({ data: { itemId: item.id, quantity: 0 } })
+    }
   }
 
   return Response.json(item, { status: 201 })

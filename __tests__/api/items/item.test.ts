@@ -28,6 +28,7 @@ const fakeItem = {
   defaultBatchQty: null,
   categoryId: null,
   isActive: true,
+  hasInventory: true,
   bakeryId: BAKERY_ID,
   category: null,
   createdAt: new Date(),
@@ -121,6 +122,31 @@ describe('PATCH /api/items/[slug]', () => {
     await PATCH(req, makeParams('croissant'))
     const call = mockPrisma.item.update.mock.calls[0][0]
     expect(call.data).not.toHaveProperty('isActive')
+  })
+
+  it('sets hasInventory to false when provided', async () => {
+    mockPrisma.item.update.mockResolvedValue({ ...fakeItem, hasInventory: false })
+    const req = new Request('http://localhost', {
+      method: 'PATCH',
+      body: JSON.stringify({ hasInventory: false }),
+    })
+    const res = await PATCH(req, makeParams('croissant'))
+    expect(res.status).toBe(200)
+    expect(mockPrisma.item.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ hasInventory: false }),
+      })
+    )
+  })
+
+  it('does not include hasInventory in update when not provided', async () => {
+    const req = new Request('http://localhost', {
+      method: 'PATCH',
+      body: JSON.stringify({ name: 'Updated Croissant' }),
+    })
+    await PATCH(req, makeParams('croissant'))
+    const call = mockPrisma.item.update.mock.calls[0][0]
+    expect(call.data).not.toHaveProperty('hasInventory')
   })
 })
 

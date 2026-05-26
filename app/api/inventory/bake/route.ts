@@ -17,6 +17,9 @@ export async function POST(req: Request) {
   if (!item) {
     return Response.json({ message: 'Item not found' }, { status: 404 })
   }
+  if (!item.hasInventory) {
+    return Response.json({ message: 'Item does not track inventory' }, { status: 400 })
+  }
 
   try {
     const transaction = await prisma.inventoryTransaction.create({

@@ -20,6 +20,7 @@ type Item = {
   par: number | null;
   defaultBatchQty: number | null;
   isActive: boolean;
+  hasInventory: boolean;
   category: Category | null;
 };
 
@@ -68,6 +69,7 @@ export function ItemSheet({
   const [newCategoryName, setNewCategoryName] = useState('');
   const [initialQtyInput, setInitialQtyInput] = useState('');
   const [isActive, setIsActive] = useState(initial?.isActive ?? true);
+  const [hasInventory, setHasInventory] = useState(initial?.hasInventory ?? true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -131,7 +133,8 @@ export function ItemSheet({
         par: parsedPar,
         defaultBatchQty: parsedDefaultBatchQty,
         categoryId: resolvedCategoryId,
-        ...(state.mode === 'add' && parsedInitialQty != null && parsedInitialQty > 0 && { initialQty: parsedInitialQty }),
+        hasInventory,
+        ...(state.mode === 'add' && hasInventory && parsedInitialQty != null && parsedInitialQty > 0 && { initialQty: parsedInitialQty }),
         ...(state.mode === 'edit' && { isActive }),
       };
 
@@ -287,7 +290,7 @@ export function ItemSheet({
               />
             )}
           </div>
-          {state.mode === 'edit' && (
+          {state.mode === 'edit' && hasInventory && (
             <div className="w-[30%] shrink-0">
               <p className="text-sm font-medium text-foreground mb-1.5">Current Qty</p>
               <div className="h-12 flex items-center px-4 rounded-xl border border-border bg-muted/40 text-[15px] text-foreground">
@@ -332,7 +335,7 @@ export function ItemSheet({
             </label>
             <NumericField id={defaultBatchQtyId} value={defaultBatchQtyInput} onChange={setDefaultBatchQtyInput} min={1} />
           </div>
-          {state.mode === 'add' && (
+          {state.mode === 'add' && hasInventory && (
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center gap-1">
                 <label htmlFor={initialQtyId} className="text-sm font-medium text-foreground">
@@ -369,6 +372,29 @@ export function ItemSheet({
             </button>
           </div>
         )}
+
+        {/* Track Inventory toggle (both modes) */}
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Track Inventory</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Off for items assembled day-of with no freezer stock</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={hasInventory}
+            onClick={() => setHasInventory(v => !v)}
+            className={`relative shrink-0 inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              hasInventory ? 'bg-primary' : 'bg-border'
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                hasInventory ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
 
         {/* Save / Cancel */}
         <div className="flex gap-3">

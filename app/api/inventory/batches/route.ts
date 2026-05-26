@@ -18,6 +18,10 @@ export async function POST(req: Request) {
     return Response.json({ message: 'quantity must be a positive integer' }, { status: 400 })
   }
 
+  const item = await prisma.item.findFirst({ where: { id: itemId, bakeryId: session.user.bakeryId } })
+  if (!item) return Response.json({ message: 'Item not found' }, { status: 404 })
+  if (!item.hasInventory) return Response.json({ message: 'Item does not track inventory' }, { status: 400 })
+
   const transaction = await prisma.inventoryTransaction.create({
     data: { itemId, delta: quantity, reason: 'BATCH', note: 'batch added' },
   })
