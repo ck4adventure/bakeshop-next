@@ -10,6 +10,7 @@ type Item = {
   par: number | null;
   defaultBatchQty: number | null;
   isActive: boolean;
+  hasInventory: boolean;
   category: Category | null;
 };
 

@@ -21,7 +21,7 @@ import { DELETE } from '@/app/api/inventory/bake/[id]/route'
 
 const BAKERY_ID = 'bakery-1'
 const fakeSession = { user: { bakeryId: BAKERY_ID } }
-const fakeItem = { id: 1, name: 'Croissant', bakeryId: BAKERY_ID }
+const fakeItem = { id: 1, name: 'Croissant', bakeryId: BAKERY_ID, hasInventory: true }
 const fakeBakeTransaction = { id: 42, itemId: 1, delta: -12, reason: 'BAKE' }
 
 function makePostRequest(body: object) {
@@ -64,6 +64,14 @@ describe('POST /api/inventory/bake', () => {
     mockPrisma.item.findFirst.mockResolvedValue(null)
     const res = await POST(makePostRequest({ itemId: 1, quantity: 12 }))
     expect(res.status).toBe(404)
+  })
+
+  it('returns 400 when item does not track inventory', async () => {
+    mockPrisma.item.findFirst.mockResolvedValue({ ...fakeItem, hasInventory: false })
+    const res = await POST(makePostRequest({ itemId: 1, quantity: 12 }))
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.message).toBe('Item does not track inventory')
   })
 
   it('returns 422 when DB trigger raises negative stock error', async () => {

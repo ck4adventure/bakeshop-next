@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   const inventory = await prisma.itemInventory.findMany({
-    where: { item: { bakeryId: session.user.bakeryId } },
+    where: { item: { bakeryId: session.user.bakeryId, hasInventory: true } },
     include: {
       item: {
         select: { id: true, name: true, slug: true, par: true, defaultBatchQty: true, category: { select: { id: true, name: true } } },

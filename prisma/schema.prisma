@@ -65,6 +65,7 @@ model Item {
   category        Category?              @relation(fields: [categoryId], references: [id])
   categoryId      Int?
   isActive        Boolean                @default(true)
+  hasInventory    Boolean                @default(true)
   inventory       ItemInventory?
   schedules       ProductionSchedule[]
   transactions    InventoryTransaction[]

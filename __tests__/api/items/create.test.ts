@@ -34,6 +34,7 @@ const fakeItem = {
   par: null,
   defaultBatchQty: null,
   categoryId: null,
+  hasInventory: true,
   bakeryId: BAKERY_ID,
   category: null,
   createdAt: new Date(),
@@ -101,6 +102,13 @@ describe('POST /api/items', () => {
     expect(mockPrisma.itemInventory.create).toHaveBeenCalledWith({
       data: { itemId: fakeItem.id, quantity: 0 },
     })
+    expect(mockPrisma.inventoryTransaction.create).not.toHaveBeenCalled()
+  })
+
+  it('skips inventory records when hasInventory is false', async () => {
+    const res = await POST(makeRequest({ name: 'Veggie Quiche', hasInventory: false }))
+    expect(res.status).toBe(201)
+    expect(mockPrisma.itemInventory.create).not.toHaveBeenCalled()
     expect(mockPrisma.inventoryTransaction.create).not.toHaveBeenCalled()
   })
 
