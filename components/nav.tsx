@@ -8,6 +8,7 @@ const TABS = [
 	{ label: "Schedule", icon: "📅", href: "/schedule" },
 	{ label: "Inventory", icon: "📦", href: "/inventory" },
 	{ label: "History", icon: "🥐", href: "/history" },
+	{ label: "Help", icon: "❓", href: "/help" },
 ] as const;
 
 const ADMIN_TABS = [
